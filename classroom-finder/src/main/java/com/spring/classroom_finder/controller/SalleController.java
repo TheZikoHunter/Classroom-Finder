@@ -67,8 +67,7 @@ public class SalleController {
 
         if (salleData.isPresent()) {
             Salle _salle = salleData.get();
-            _salle.setNom_salle(salle.getNom_salle());
-            _salle.setCapacite(salle.getCapacite());
+            _salle.setNomSalle(salle.getNomSalle());
             // Update other fields as needed
             return new ResponseEntity<>(salleRepository.save(_salle), HttpStatus.OK);
         } else {

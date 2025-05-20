@@ -7,43 +7,43 @@ import java.util.List;
 @Entity
 public class Filiere {
     @Id
-    private int id_filiere;
+    private int idFiliere;
 
-    private int email_représentant;
-    private String nom_filiere;
+    private String email_représentant;
+    private String nomFiliere;
 
     public Filiere() {
     }
 
-    public Filiere(int id_filiere, int email_représentant, String nom_filiere) {
-        this.id_filiere = id_filiere;
+    public Filiere(int idFiliere, String email_représentant, String nomFiliere) {
+        this.idFiliere = idFiliere;
         this.email_représentant = email_représentant;
-        this.nom_filiere = nom_filiere;
+        this.nomFiliere = nomFiliere;
     }
 
-    public int getId_filiere() {
-        return id_filiere;
+    public int getIdFiliere() {
+        return idFiliere;
     }
 
-    public void setId_filiere(int id_filiere) {
-        this.id_filiere = id_filiere;
+    public void setIdFiliere(int idFiliere) {
+        this.idFiliere = idFiliere;
     }
 
 
-    public int getEmail_représentant() {
+    public String getEmail_représentant() {
         return email_représentant;
     }
 
-    public void setEmail_représentant(int email_représentant) {
+    public void setEmail_représentant(String email_représentant) {
         this.email_représentant = email_représentant;
     }
 
-    public String getNom_filiere() {
-        return nom_filiere;
+    public String getNomFiliere() {
+        return nomFiliere;
     }
 
-    public void setNom_filiere(String nom_filiere) {
-        this.nom_filiere = nom_filiere;
+    public void setNomFiliere(String nomFiliere) {
+        this.nomFiliere = nomFiliere;
     }
 
 

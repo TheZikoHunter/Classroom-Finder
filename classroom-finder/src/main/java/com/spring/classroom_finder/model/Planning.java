@@ -1,30 +1,50 @@
 package com.spring.classroom_finder.model;
+
 import jakarta.persistence.*;
+
+import java.util.List;
+import java.util.Objects;
+
 @Entity
+@Table(name = "plannings")
 public class Planning {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "salle_id", nullable = false)
     private Salle salle;
 
     @ManyToOne
+    @JoinColumn(name = "matiere_id", nullable = false)
     private Matiere matiere;
 
     @ManyToOne
+    @JoinColumn(name = "horaire_id", nullable = false)
     private Horaire horaire;
 
+    @ManyToOne
+    @JoinColumn(name = "professeur_id", nullable = false)
+    private Professeur professeur;
+
+    @ManyToOne
+    @JoinColumn(name = "filiere_id", nullable = false)
+    private Filiere filiere;
+
+    // Constructors
     public Planning() {
     }
 
-    public Planning(Long id, Salle salle, Matiere matiere, Horaire horaire) {
-        this.id = id;
+    public Planning(Salle salle, Matiere matiere, Horaire horaire, Professeur professeur, Filiere filiere) {
         this.salle = salle;
         this.matiere = matiere;
         this.horaire = horaire;
+        this.professeur = professeur;
+        this.filiere = filiere;
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -55,5 +75,83 @@ public class Planning {
 
     public void setHoraire(Horaire horaire) {
         this.horaire = horaire;
+    }
+
+    public Professeur getProfesseur() {
+        return professeur;
+    }
+
+    public void setProfesseur(Professeur professeur) {
+        this.professeur = professeur;
+    }
+
+    public Filiere getFiliere() {
+        return filiere;
+    }
+
+    public void setFiliere(Filiere filiere) {
+        this.filiere = filiere;
+    }
+
+    // Equals and hashCode methods for conflict validation
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Planning planning = (Planning) o;
+        return Objects.equals(id, planning.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    // Method to check if this planning conflicts with another planning
+    public boolean conflictsWith(Planning other) {
+        // If it's the same time slot
+        if (this.horaire.equals(other.horaire)) {
+            // Check if same professor (professor can't be in two places at once)
+            if (this.professeur.equals(other.professeur)) {
+                return true;
+            }
+
+            // Check if same classroom (classroom can't host two classes at once)
+            if (this.salle.equals(other.salle)) {
+                return true;
+            }
+
+            // Check if same filiere at the same time (a major can't have two classes at once)
+            if (this.filiere.equals(other.filiere)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Planning{" +
+                "id=" + id +
+                ", salle=" + salle +
+                ", matiere=" + matiere +
+                ", horaire=" + horaire +
+                ", professeur=" + professeur +
+                ", filiere=" + filiere +
+                '}';
+    }
+
+    /**
+     * Check if this planning has scheduling conflicts with the provided list of plannings
+     *
+     * @param existingPlannings List of existing plannings to check against
+     * @return true if there's a conflict, false otherwise
+     */
+    public boolean hasConflictWith(List<Planning> existingPlannings) {
+        // Filter out this planning if it has an ID (for update operations)
+        return existingPlannings.stream()
+                .filter(p -> this.getId() == null || !this.getId().equals(p.getId()))
+                .anyMatch(this::conflictsWith);
     }
 }

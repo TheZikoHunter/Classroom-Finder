@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface MatiereRepository extends JpaRepository<Matiere, Integer> {
     List<Matiere> findByNomMatiereContaining(String nom);
-    List<Matiere> findByFiliereId(int filiereId);
+    List<Matiere> findById(int id);
 }

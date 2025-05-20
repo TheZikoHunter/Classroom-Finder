@@ -67,7 +67,7 @@ public class FiliereController {
 
         if (filiereData.isPresent()) {
             Filiere _filiere = filiereData.get();
-            _filiere.setNom_filiere(filiere.getNom_filiere());
+            _filiere.setNomFiliere(filiere.getNomFiliere());
             _filiere.setEmail_représentant(filiere.getEmail_représentant());
             return new ResponseEntity<>(filiereRepository.save(_filiere), HttpStatus.OK);
         } else {

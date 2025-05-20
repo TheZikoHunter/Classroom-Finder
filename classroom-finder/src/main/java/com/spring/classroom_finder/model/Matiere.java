@@ -7,34 +7,34 @@ import java.util.List;
 public class Matiere {
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
 
-    private String nom_matière;
+    private String nomMatiere;
 
 
     public Matiere() {
     }
 
-    public Matiere(Long id, String nom_matière, Professeur professeur, Filiere filiere, List<Planning> plannings) {
+    public Matiere(int id, String nom_matière, Professeur professeur, Filiere filiere, List<Planning> plannings) {
         this.id = id;
-        this.nom_matière = nom_matière;
+        this.nomMatiere = nom_matière;
 
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public String getNom_matière() {
-        return nom_matière;
+    public String getNomMatiere() {
+        return nomMatiere;
     }
 
-    public void setNom_matière(String nom_matière) {
-        this.nom_matière = nom_matière;
+    public void setNomMatiere(String nom_matière) {
+        this.nomMatiere = nom_matière;
     }
 
 }

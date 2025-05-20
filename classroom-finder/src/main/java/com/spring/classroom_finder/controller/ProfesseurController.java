@@ -27,7 +27,7 @@ public class ProfesseurController {
             if (nom == null)
                 professeurs.addAll(professeurRepository.findAll());
             else
-                professeurs.addAll(professeurRepository.findByNomContaining(nom));
+                professeurs.addAll(professeurRepository.findByNomProfesseurContaining(nom));
 
             if (professeurs.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -67,8 +67,8 @@ public class ProfesseurController {
 
         if (professeurData.isPresent()) {
             Professeur _professeur = professeurData.get();
-            _professeur.setNom_professeur(professeur.getNom_professeur());
-            _professeur.setPrénom_professeur(professeur.getPrénom_professeur());
+            _professeur.setNomProfesseur(professeur.getNomProfesseur());
+            _professeur.setPrenomProfesseur(professeur.getPrenomProfesseur());
             _professeur.setEmail(professeur.getEmail());
             // Update other fields as needed
             return new ResponseEntity<>(professeurRepository.save(_professeur), HttpStatus.OK);

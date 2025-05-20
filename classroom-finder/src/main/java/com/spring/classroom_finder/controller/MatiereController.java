@@ -42,12 +42,16 @@ public class MatiereController {
     // Get a Matiere by id
     @GetMapping("/{id}")
     public ResponseEntity<Matiere> getMatiereById(@PathVariable("id") int id) {
-        Optional<Matiere> matiereData = matiereRepository.findById(id);
+        List<Matiere> matiereData = matiereRepository.findById(id); // méthode personnalisée
 
-        return matiereData.map(matiere ->
-                        new ResponseEntity<>(matiere, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        if (matiereData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(matiereData.get(0), HttpStatus.OK);
+        }
     }
+
+
 
     // Create a new Matiere
     @PostMapping
@@ -60,20 +64,7 @@ public class MatiereController {
         }
     }
 
-    // Update a Matiere
-    @PutMapping("/{id}")
-    public ResponseEntity<Matiere> updateMatiere(@PathVariable("id") int id, @RequestBody Matiere matiere) {
-        Optional<Matiere> matiereData = matiereRepository.findById(id);
 
-        if (matiereData.isPresent()) {
-            Matiere _matiere = matiereData.get();
-            _matiere.setNom_matière(matiere.getNom_matière());
-            // Update other fields as needed based on your Matiere model
-            return new ResponseEntity<>(matiereRepository.save(_matiere), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 
     // Delete a Matiere
     @DeleteMapping("/{id}")
@@ -97,19 +88,5 @@ public class MatiereController {
         }
     }
 
-    // Get Matieres by filiere id
-    @GetMapping("/filiere/{filiereId}")
-    public ResponseEntity<List<Matiere>> getMatieresByFiliereId(@PathVariable("filiereId") int filiereId) {
-        try {
-            List<Matiere> matieres = matiereRepository.findByFiliereId(filiereId);
 
-            if (matieres.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(matieres, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }

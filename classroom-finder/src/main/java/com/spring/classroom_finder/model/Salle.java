@@ -7,38 +7,29 @@ import java.util.List;
 @Entity
 public class Salle {
     @Id
-    private String nom_salle;
+    private String nomSalle;
 
-    @OneToMany(mappedBy = "salle")
-    private List<Reservation> reservations;
 
     @OneToMany(mappedBy = "salle")
     private List<Planning> plannings; // Entité d'association
 
-    public Salle(String nom_salle, List<Reservation> reservations, List<Planning> plannings) {
-        this.nom_salle = nom_salle;
-        this.reservations = reservations;
+    public Salle(String nom_salle, List<Planning> plannings) {
+        this.nomSalle = nom_salle;
+
         this.plannings = plannings;
     }
 
     public Salle() {
     }
 
-    public String getNom_salle() {
-        return nom_salle;
+    public String getNomSalle() {
+        return nomSalle;
     }
 
-    public void setNom_salle(String nom_salle) {
-        this.nom_salle = nom_salle;
+    public void setNomSalle(String nom_salle) {
+        this.nomSalle = nom_salle;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
 
     public List<Planning> getPlannings() {
         return plannings;

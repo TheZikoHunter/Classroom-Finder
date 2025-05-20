@@ -11,16 +11,14 @@ public class Administrateur {
     private String nom;
     private String prenom;
 
-    @OneToMany(mappedBy = "administrateur")
-    private List<Reservation> reservations;
 
-    public Administrateur(int id_administrateur, String email, String mot_de_passe, String nom, String prenom, List<Reservation> reservations) {
+
+    public Administrateur(int id_administrateur, String email, String mot_de_passe, String nom, String prenom) {
         this.id_administrateur = id_administrateur;
         this.email = email;
         this.mot_de_passe = mot_de_passe;
         this.nom = nom;
         this.prenom = prenom;
-        this.reservations = reservations;
     }
 
     public Administrateur() {
@@ -69,11 +67,4 @@ public class Administrateur {
     }
 
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
 }

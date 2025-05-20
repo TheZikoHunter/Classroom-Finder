@@ -9,17 +9,17 @@ public class Professeur {
 
     private String email;
     private String mot_de_passe;
-    private String nom_professeur;
-    private String prénom_professeur;
+    private String nomProfesseur;
+    private String prenomProfesseur;
 
 
 
-    public Professeur(int id_professeur, String email, String mot_de_passe, String nom_professeur, String prénom_professeur, List<Reservation> reservations, List<Matiere> matieres) {
+    public Professeur(int id_professeur, String email, String mot_de_passe, String nom_professeur, String prénom_professeur) {
         this.id_professeur = id_professeur;
         this.email = email;
         this.mot_de_passe = mot_de_passe;
-        this.nom_professeur = nom_professeur;
-        this.prénom_professeur = prénom_professeur;
+        this.nomProfesseur = nom_professeur;
+        this.prenomProfesseur = prénom_professeur;
 
     }
 
@@ -50,20 +50,20 @@ public class Professeur {
         this.mot_de_passe = mot_de_passe;
     }
 
-    public String getNom_professeur() {
-        return nom_professeur;
+    public String getNomProfesseur() {
+        return nomProfesseur;
     }
 
-    public void setNom_professeur(String nom_professeur) {
-        this.nom_professeur = nom_professeur;
+    public void setNomProfesseur(String nom_professeur) {
+        this.nomProfesseur = nom_professeur;
     }
 
-    public String getPrénom_professeur() {
-        return prénom_professeur;
+    public String getPrenomProfesseur() {
+        return prenomProfesseur;
     }
 
-    public void setPrénom_professeur(String prénom_professeur) {
-        this.prénom_professeur = prénom_professeur;
+    public void setPrenomProfesseur(String prénom_professeur) {
+        this.prenomProfesseur = prénom_professeur;
     }
 
 }
