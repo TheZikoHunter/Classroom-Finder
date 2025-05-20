@@ -9,22 +9,16 @@ public class Filiere {
     @Id
     private int id_filiere;
 
-    private String année;
     private int email_représentant;
     private String nom_filiere;
-
-    @OneToMany(mappedBy = "filiere")
-    private List<Matiere> matieres;
 
     public Filiere() {
     }
 
-    public Filiere(int id_filiere, String année, int email_représentant, String nom_filiere, List<Matiere> matieres) {
+    public Filiere(int id_filiere, int email_représentant, String nom_filiere) {
         this.id_filiere = id_filiere;
-        this.année = année;
         this.email_représentant = email_représentant;
         this.nom_filiere = nom_filiere;
-        this.matieres = matieres;
     }
 
     public int getId_filiere() {
@@ -35,13 +29,6 @@ public class Filiere {
         this.id_filiere = id_filiere;
     }
 
-    public String getAnnée() {
-        return année;
-    }
-
-    public void setAnnée(String année) {
-        this.année = année;
-    }
 
     public int getEmail_représentant() {
         return email_représentant;
@@ -59,11 +46,5 @@ public class Filiere {
         this.nom_filiere = nom_filiere;
     }
 
-    public List<Matiere> getMatieres() {
-        return matieres;
-    }
 
-    public void setMatieres(List<Matiere> matieres) {
-        this.matieres = matieres;
-    }
 }

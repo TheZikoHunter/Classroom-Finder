@@ -1,6 +1,7 @@
 package com.spring.classroom_finder.model;
 import jakarta.persistence.*;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,17 +10,17 @@ public class Horaire {
     @Id
     private int id_horaire;
 
-    private LocalDateTime heure_debut;
-    private LocalDateTime heure_fin;
+    private String heure_debut;
+    private String heure_fin;
+    private String day;
 
-    @OneToMany(mappedBy = "horaire")
-    private List<Planning> plannings;
+;
 
-    public Horaire(int id_horaire, LocalDateTime heure_debut, LocalDateTime heure_fin, List<Planning> plannings) {
+    public Horaire(int id_horaire, String heure_debut, String heure_fin, String day) {
         this.id_horaire = id_horaire;
         this.heure_debut = heure_debut;
         this.heure_fin = heure_fin;
-        this.plannings = plannings;
+        this.day = day;
     }
 
     public Horaire() {
@@ -33,28 +34,28 @@ public class Horaire {
         this.id_horaire = id_horaire;
     }
 
-    public LocalDateTime getHeure_debut() {
+    public String getHeure_debut() {
         return heure_debut;
     }
 
-    public void setHeure_debut(LocalDateTime heure_debut) {
+    public void setHeure_debut(String heure_debut) {
         this.heure_debut = heure_debut;
     }
 
-    public LocalDateTime getHeure_fin() {
+    public String getHeure_fin() {
         return heure_fin;
     }
 
-    public void setHeure_fin(LocalDateTime heure_fin) {
+    public void setHeure_fin(String heure_fin) {
         this.heure_fin = heure_fin;
     }
 
-    public List<Planning> getPlannings() {
-        return plannings;
+    public String getDay() {
+        return day;
     }
 
-    public void setPlannings(List<Planning> plannings) {
-        this.plannings = plannings;
+    public void setDay(String day) {
+        this.day = day;
     }
 }
 

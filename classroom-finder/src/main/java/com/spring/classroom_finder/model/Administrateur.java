@@ -6,21 +6,20 @@ import java.util.List;
 public class Administrateur {
     @Id
     private int id_administrateur;
-
     private String email;
     private String mot_de_passe;
-    private String nom_administrateur;
-    private String prénom_administrateur;
+    private String nom;
+    private String prenom;
 
     @OneToMany(mappedBy = "administrateur")
     private List<Reservation> reservations;
 
-    public Administrateur(int id_administrateur, String email, String mot_de_passe, String nom_administrateur, String prénom_administrateur, List<Reservation> reservations) {
+    public Administrateur(int id_administrateur, String email, String mot_de_passe, String nom, String prenom, List<Reservation> reservations) {
         this.id_administrateur = id_administrateur;
         this.email = email;
         this.mot_de_passe = mot_de_passe;
-        this.nom_administrateur = nom_administrateur;
-        this.prénom_administrateur = prénom_administrateur;
+        this.nom = nom;
+        this.prenom = prenom;
         this.reservations = reservations;
     }
 
@@ -51,21 +50,24 @@ public class Administrateur {
         this.mot_de_passe = mot_de_passe;
     }
 
-    public String getNom_administrateur() {
-        return nom_administrateur;
+
+
+    public String getNom() {
+        return nom;
     }
 
-    public void setNom_administrateur(String nom_administrateur) {
-        this.nom_administrateur = nom_administrateur;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
-    public String getPrénom_administrateur() {
-        return prénom_administrateur;
+    public String getPrenom() {
+        return prenom;
     }
 
-    public void setPrénom_administrateur(String prénom_administrateur) {
-        this.prénom_administrateur = prénom_administrateur;
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
     }
+
 
     public List<Reservation> getReservations() {
         return reservations;

@@ -12,11 +12,7 @@ public class Professeur {
     private String nom_professeur;
     private String prénom_professeur;
 
-    @OneToMany(mappedBy = "professeur")
-    private List<Reservation> reservations;
 
-    @OneToMany(mappedBy = "professeur")
-    private List<Matiere> matieres;
 
     public Professeur(int id_professeur, String email, String mot_de_passe, String nom_professeur, String prénom_professeur, List<Reservation> reservations, List<Matiere> matieres) {
         this.id_professeur = id_professeur;
@@ -24,8 +20,7 @@ public class Professeur {
         this.mot_de_passe = mot_de_passe;
         this.nom_professeur = nom_professeur;
         this.prénom_professeur = prénom_professeur;
-        this.reservations = reservations;
-        this.matieres = matieres;
+
     }
 
     public Professeur() {
@@ -71,19 +66,4 @@ public class Professeur {
         this.prénom_professeur = prénom_professeur;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
-
-    public List<Matiere> getMatieres() {
-        return matieres;
-    }
-
-    public void setMatieres(List<Matiere> matieres) {
-        this.matieres = matieres;
-    }
 }

@@ -11,16 +11,6 @@ public class Matiere {
 
     private String nom_matière;
 
-    @ManyToOne
-    @JoinColumn(name = "id_professeur")
-    private Professeur professeur;
-
-    @ManyToOne
-    @JoinColumn(name = "id_filiere")
-    private Filiere filiere;
-
-    @OneToMany(mappedBy = "matiere")
-    private List<Planning> plannings;
 
     public Matiere() {
     }
@@ -28,9 +18,7 @@ public class Matiere {
     public Matiere(Long id, String nom_matière, Professeur professeur, Filiere filiere, List<Planning> plannings) {
         this.id = id;
         this.nom_matière = nom_matière;
-        this.professeur = professeur;
-        this.filiere = filiere;
-        this.plannings = plannings;
+
     }
 
     public Long getId() {
@@ -49,27 +37,4 @@ public class Matiere {
         this.nom_matière = nom_matière;
     }
 
-    public Professeur getProfesseur() {
-        return professeur;
-    }
-
-    public void setProfesseur(Professeur professeur) {
-        this.professeur = professeur;
-    }
-
-    public Filiere getFiliere() {
-        return filiere;
-    }
-
-    public void setFiliere(Filiere filiere) {
-        this.filiere = filiere;
-    }
-
-    public List<Planning> getPlannings() {
-        return plannings;
-    }
-
-    public void setPlannings(List<Planning> plannings) {
-        this.plannings = plannings;
-    }
 }
