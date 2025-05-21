@@ -10,13 +10,11 @@ public class Salle {
     private String nomSalle;
 
 
-    @OneToMany(mappedBy = "salle")
-    private List<Planning> plannings; // Entité d'association
 
-    public Salle(String nom_salle, List<Planning> plannings) {
+
+    public Salle(String nom_salle) {
         this.nomSalle = nom_salle;
 
-        this.plannings = plannings;
     }
 
     public Salle() {
@@ -31,11 +29,4 @@ public class Salle {
     }
 
 
-    public List<Planning> getPlannings() {
-        return plannings;
-    }
-
-    public void setPlannings(List<Planning> plannings) {
-        this.plannings = plannings;
-    }
 }

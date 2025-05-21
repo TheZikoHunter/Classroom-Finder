@@ -10,26 +10,26 @@ import java.util.Objects;
 public class Planning {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPlanning;
 
     @ManyToOne
-    @JoinColumn(name = "salle_id", nullable = false)
+    @JoinColumn(name = "nomSalle", nullable = false)
     private Salle salle;
 
     @ManyToOne
-    @JoinColumn(name = "matiere_id", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
     private Matiere matiere;
 
     @ManyToOne
-    @JoinColumn(name = "horaire_id", nullable = false)
+    @JoinColumn(name = "id_horaire", nullable = false)
     private Horaire horaire;
 
     @ManyToOne
-    @JoinColumn(name = "professeur_id", nullable = false)
+    @JoinColumn(name = "id_professeur", nullable = false)
     private Professeur professeur;
 
     @ManyToOne
-    @JoinColumn(name = "filiere_id", nullable = false)
+    @JoinColumn(name = "idFiliere", nullable = false)
     private Filiere filiere;
 
     // Constructors
@@ -44,17 +44,17 @@ public class Planning {
         this.filiere = filiere;
     }
 
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Salle getSalle() {
         return salle;
+    }
+
+    public Long getIdPlanning() {
+        return idPlanning;
+    }
+
+    public void setIdPlanning(Long idPlanning) {
+        this.idPlanning = idPlanning;
     }
 
     public void setSalle(Salle salle) {
@@ -99,12 +99,12 @@ public class Planning {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Planning planning = (Planning) o;
-        return Objects.equals(id, planning.id);
+        return Objects.equals(idPlanning, planning.idPlanning);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(idPlanning);
     }
 
     // Method to check if this planning conflicts with another planning
@@ -133,7 +133,7 @@ public class Planning {
     @Override
     public String toString() {
         return "Planning{" +
-                "id=" + id +
+                "id=" + idPlanning +
                 ", salle=" + salle +
                 ", matiere=" + matiere +
                 ", horaire=" + horaire +
@@ -151,7 +151,7 @@ public class Planning {
     public boolean hasConflictWith(List<Planning> existingPlannings) {
         // Filter out this planning if it has an ID (for update operations)
         return existingPlannings.stream()
-                .filter(p -> this.getId() == null || !this.getId().equals(p.getId()))
+                .filter(p -> this.getIdPlanning() == null || !this.getIdPlanning().equals(p.getIdPlanning()))
                 .anyMatch(this::conflictsWith);
     }
 }

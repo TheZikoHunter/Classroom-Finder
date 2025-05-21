@@ -6,7 +6,6 @@ import java.util.List;
 @Entity
 public class Matiere {
     @Id
-    @GeneratedValue
     private int id;
 
     private String nomMatiere;

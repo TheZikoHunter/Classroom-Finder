@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/salles")
+@CrossOrigin(origins = "http://localhost:4200")
 public class SalleController {
 
     @Autowired
@@ -41,8 +42,8 @@ public class SalleController {
 
     // Get a Salle by id
     @GetMapping("/{id}")
-    public ResponseEntity<Salle> getSalleById(@PathVariable("id") int id) {
-        Optional<Salle> salleData = salleRepository.findById(id);
+    public ResponseEntity<Salle> getSalleById(@PathVariable("id") String id) {
+        Optional<Salle> salleData = salleRepository.findByNomSalle(id);
 
         return salleData.map(salle ->
                         new ResponseEntity<>(salle, HttpStatus.OK))
@@ -62,8 +63,8 @@ public class SalleController {
 
     // Update a Salle
     @PutMapping("/{id}")
-    public ResponseEntity<Salle> updateSalle(@PathVariable("id") int id, @RequestBody Salle salle) {
-        Optional<Salle> salleData = salleRepository.findById(id);
+    public ResponseEntity<Salle> updateSalle(@PathVariable("id") String id, @RequestBody Salle salle) {
+        Optional<Salle> salleData = salleRepository.findByNomSalle(id);
 
         if (salleData.isPresent()) {
             Salle _salle = salleData.get();
@@ -77,7 +78,7 @@ public class SalleController {
 
     // Delete a Salle
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteSalle(@PathVariable("id") int id) {
+    public ResponseEntity<HttpStatus> deleteSalle(@PathVariable("id") String id) {
         try {
             salleRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

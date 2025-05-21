@@ -20,6 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/plannings")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PlanningController {
 
     private final PlanningRepository planningRepository;
@@ -68,7 +69,7 @@ public class PlanningController {
                 return new ResponseEntity<>("Planning with id " + id + " not found", HttpStatus.NOT_FOUND);
             }
 
-            planning.setId(id);
+            planning.setIdPlanning(id);
             validateNoConflicts(planning);
             Planning updatedPlanning = planningRepository.save(planning);
             return new ResponseEntity<>(updatedPlanning, HttpStatus.OK);
@@ -128,7 +129,7 @@ public class PlanningController {
                 planning.getProfesseur(), planning.getHoraire());
 
         // Filter out the current planning if it's an update
-        professorConflicts.removeIf(p -> p.getId() != null && p.getId().equals(planning.getId()));
+        professorConflicts.removeIf(p -> p.getIdPlanning() != null && p.getIdPlanning().equals(planning.getIdPlanning()));
 
         if (!professorConflicts.isEmpty()) {
             throw new PlanningConflictException("Professor is already scheduled for this time slot");
@@ -139,7 +140,7 @@ public class PlanningController {
                 planning.getSalle(), planning.getHoraire());
 
         // Filter out the current planning if it's an update
-        salleConflicts.removeIf(p -> p.getId() != null && p.getId().equals(planning.getId()));
+        salleConflicts.removeIf(p -> p.getIdPlanning() != null && p.getIdPlanning().equals(planning.getIdPlanning()));
 
         if (!salleConflicts.isEmpty()) {
             throw new PlanningConflictException("Classroom is already booked for this time slot");
@@ -150,7 +151,7 @@ public class PlanningController {
                 planning.getFiliere(), planning.getHoraire());
 
         // Filter out the current planning if it's an update
-        filiereConflicts.removeIf(p -> p.getId() != null && p.getId().equals(planning.getId()));
+        filiereConflicts.removeIf(p -> p.getIdPlanning() != null && p.getIdPlanning().equals(planning.getIdPlanning()));
 
         if (!filiereConflicts.isEmpty()) {
             throw new PlanningConflictException("Major already has a class scheduled for this time slot");

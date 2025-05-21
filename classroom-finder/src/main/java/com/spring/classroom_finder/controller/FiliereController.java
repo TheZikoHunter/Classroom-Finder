@@ -13,6 +13,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/filieres")
+
+@CrossOrigin(origins = "http://localhost:4200")
 public class FiliereController {
 
     @Autowired
@@ -68,7 +70,7 @@ public class FiliereController {
         if (filiereData.isPresent()) {
             Filiere _filiere = filiereData.get();
             _filiere.setNomFiliere(filiere.getNomFiliere());
-            _filiere.setEmail_représentant(filiere.getEmail_représentant());
+            _filiere.setemail_representant(filiere.getemail_representant());
             return new ResponseEntity<>(filiereRepository.save(_filiere), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

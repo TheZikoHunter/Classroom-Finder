@@ -7,17 +7,18 @@ import java.util.List;
 @Entity
 public class Filiere {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idFiliere;
 
-    private String email_représentant;
+    private String email_representant;
     private String nomFiliere;
 
     public Filiere() {
     }
 
-    public Filiere(int idFiliere, String email_représentant, String nomFiliere) {
+    public Filiere(int idFiliere, String email_representant, String nomFiliere) {
         this.idFiliere = idFiliere;
-        this.email_représentant = email_représentant;
+        this.email_representant = email_representant;
         this.nomFiliere = nomFiliere;
     }
 
@@ -30,12 +31,12 @@ public class Filiere {
     }
 
 
-    public String getEmail_représentant() {
-        return email_représentant;
+    public String getemail_representant() {
+        return email_representant;
     }
 
-    public void setEmail_représentant(String email_représentant) {
-        this.email_représentant = email_représentant;
+    public void setemail_representant(String email_representant) {
+        this.email_representant = email_representant;
     }
 
     public String getNomFiliere() {
