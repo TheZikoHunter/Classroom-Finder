@@ -1,0 +1,42 @@
+<div class="container">
+  <h2>Classroom Management</h2>
+  
+  <form [formGroup]="classroomForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Classroom Name</label>
+      <input type="text" id="name" formControlName="name" class="form-control">
+      <div *ngIf="classroomForm.get('name')?.invalid && classroomForm.get('name')?.touched" class="error">
+        Classroom name is required
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" [disabled]="classroomForm.invalid" class="btn btn-primary">
+        {{ isEditing ? 'Update' : 'Add' }} Classroom
+      </button>
+      <button type="button" *ngIf="isEditing" (click)="resetForm()" class="btn btn-secondary">
+        Cancel
+      </button>
+    </div>
+  </form>
+  
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Classroom Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let classroom of classrooms">
+          <td>{{ classroom.name }}</td>
+          <td>
+            <button (click)="editClassroom(classroom)" class="btn btn-sm btn-info">Edit</button>
+            <button (click)="deleteClassroom(classroom.id)" class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

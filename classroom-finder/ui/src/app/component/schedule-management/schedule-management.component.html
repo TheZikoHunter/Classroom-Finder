@@ -1,0 +1,101 @@
+<div class="container">
+  <h2>Schedule Management</h2>
+  
+  <div class="major-selector">
+    <label>Select Major:</label>
+    <select [(ngModel)]="selectedMajor" (change)="loadSchedule()">
+      <option [ngValue]="undefined">-- Select Major --</option>
+      <option *ngFor="let major of majors" [ngValue]="major">
+        {{ major.name }} (Year {{ major.year }})
+      </option>
+    </select>
+  </div>
+  
+  <div *ngIf="selectedMajor" class="schedule-table-container">
+    <h3>Schedule for {{ selectedMajor.name }} (Year {{ selectedMajor.year }})</h3>
+    
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>Time / Day</th>
+          <th *ngFor="let day of days">{{ day }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let timeSlot of timeSlots; let i = index">
+          <td>{{ timeSlot }}</td>
+          <td *ngFor="let day of days; let j = index" class="schedule-cell">
+            <ng-container *ngIf="getScheduleItem(j, i); let item; else emptyCell">
+              <div class="schedule-item">
+                <p><strong>Subject:</strong> {{ getSubjectName(item.subjectId) }}</p>
+                <p><strong>Professor:</strong> {{ getProfessorName(item.professorId) }}</p>
+                <p><strong>Classroom:</strong> {{ getClassroomName(item.classroomId) }}</p>
+                <button (click)="deleteScheduleItem(item.id)" class="btn btn-sm btn-danger">
+                  Remove
+                </button>
+              </div>
+            </ng-container>
+            <ng-template #emptyCell>
+              <button (click)="openAddScheduleItemModal(j, i)" class="btn btn-sm btn-primary add-btn">
+                <i class="fa fa-plus"></i>
+              </button>
+            </ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Modal for adding schedule item -->
+  <div *ngIf="showScheduleItemModal" class="modal">
+    <div class="modal-content">
+      <h3>Add Schedule Item</h3>
+      <p>Day: {{ days[currentDay] }} | Time: {{ timeSlots[currentTimeSlot] }}</p>
+      
+      <form [formGroup]="scheduleItemForm" (ngSubmit)="addScheduleItem()">
+        <div class="form-group">
+          <label for="subjectId">Subject</label>
+          <select id="subjectId" formControlName="subjectId" class="form-control">
+            <option value="">-- Select Subject --</option>
+            <option *ngFor="let subject of subjects" [value]="subject.id">
+              {{ subject.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="professorId">Professor</label>
+          <select id="professorId" formControlName="professorId" class="form-control">
+            <option value="">-- Select Professor --</option>
+            <option *ngFor="let professor of professors" [value]="professor.id">
+              {{ professor.firstName }} {{ professor.lastName }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="classroomId">Classroom</label>
+          <select id="classroomId" formControlName="classroomId" class="form-control">
+            <option value="">-- Select Classroom --</option>
+            <option *ngFor="let classroom of classrooms" [value]="classroom.id">
+              {{ classroom.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="submit" [disabled]="scheduleItemForm.invalid" class="btn btn-primary">
+            Add to Schedule
+          </button>
+          <button type="button" (click)="closeScheduleItemModal()" class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div class="empty-classrooms-section">
+    <button (click)="findEmptyClassrooms()" class="btn btn-primary">Find Empty Classrooms</button>
+  </div>
+</div>
