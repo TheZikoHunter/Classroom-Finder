@@ -9,8 +9,7 @@ import { DataService } from '../../services/data.service';
   selector: 'app-user-management',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.css']
+  templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
   professors: Professor[] = [];

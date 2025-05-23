@@ -28,7 +28,7 @@ import { TimeSlot } from '../../models/time-slot.model';
           <select [(ngModel)]="selectedProfessor" class="form-control">
             <option [ngValue]="null">Select Professor</option>
             <option *ngFor="let professor of professors" [ngValue]="professor">
-              {{professor.name}}
+              {{professor.nomProfesseur}}
             </option>
           </select>
         </div>

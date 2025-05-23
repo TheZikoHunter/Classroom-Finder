@@ -78,7 +78,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
                 </div>
                 <div class="slot-details">
                   <div class="subject">{{slot.subject?.name || 'No subject assigned'}}</div>
-                  <div class="professor">{{slot.professor?.name || 'No professor assigned'}}</div>
+                  <div class="professor">{{slot.professor?.nomProfesseur || 'No professor assigned'}}</div>
                   <div class="classroom">{{slot.classroom?.nomSalle || 'No classroom assigned'}}</div>
                 </div>
                 <div class="slot-actions">
