@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Professor } from '../models/professor.model';
 import { Subject } from '../models/subject.model';
 import { Classroom } from '../models/classroom.model';
@@ -12,21 +12,6 @@ import { Major } from '../models/major.model';
 export class DataService {
   private apiUrl = 'http://localhost:8090/api';
 
-  private subjects: Subject[] = [
-    { id: 1, name: 'Mathematics', code: 'MATH101' },
-    { id: 2, name: 'Physics', code: 'PHYS101' }
-  ];
-
-  private classrooms: Classroom[] = [
-    { nomSalle: 'Room 101' },
-    { nomSalle: 'Room 102' }
-  ];
-
-  private majors: Major[] = [
-    { idFiliere: 1, nomFiliere: 'Computer Science', email_representant: 'cs@example.com' },
-    { idFiliere: 2, nomFiliere: 'Engineering', email_representant: 'eng@example.com' }
-  ];
-
   constructor(private http: HttpClient) { }
 
   // Professor operations
@@ -34,12 +19,12 @@ export class DataService {
     return this.http.get<Professor[]>(`${this.apiUrl}/professeurs`);
   }
 
-  createProfessor(professor: Omit<Professor, 'id_professeur'>): Observable<Professor> {
+  createProfessor(professor: Professor): Observable<Professor> {
     return this.http.post<Professor>(`${this.apiUrl}/professeurs`, professor);
   }
 
   updateProfessor(professor: Professor): Observable<Professor> {
-    return this.http.put<Professor>(`${this.apiUrl}/professeurs/${professor.id_professeur}`, professor);
+    return this.http.put<Professor>(`${this.apiUrl}/professeurs/${professor.id}`, professor);
   }
 
   deleteProfessor(id: number): Observable<void> {
@@ -48,34 +33,19 @@ export class DataService {
 
   // Subject operations
   getSubjects(): Observable<Subject[]> {
-    return of(this.subjects);
+    return this.http.get<Subject[]>(`${this.apiUrl}/matieres`);
   }
 
-  createSubject(subject: Omit<Subject, 'id'>): Observable<Subject> {
-    const newSubject = {
-      ...subject,
-      id: this.subjects.length + 1
-    };
-    this.subjects.push(newSubject);
-    return of(newSubject);
+  createSubject(subject: { nomMatiere: string }): Observable<Subject> {
+    return this.http.post<Subject>(`${this.apiUrl}/matieres`, subject);
   }
 
-  updateSubject(subject: Subject): Observable<Subject> {
-    const index = this.subjects.findIndex(s => s.id === subject.id);
-    if (index !== -1) {
-      this.subjects[index] = subject;
-      return of(subject);
-    }
-    throw new Error('Subject not found');
+  updateSubject(id: number, subject: { nomMatiere: string }): Observable<Subject> {
+    return this.http.put<Subject>(`${this.apiUrl}/matieres/${id}`, subject);
   }
 
   deleteSubject(id: number): Observable<void> {
-    const index = this.subjects.findIndex(s => s.id === id);
-    if (index !== -1) {
-      this.subjects.splice(index, 1);
-      return of(void 0);
-    }
-    throw new Error('Subject not found');
+    return this.http.delete<void>(`${this.apiUrl}/matieres/${id}`);
   }
 
   // Classroom operations
@@ -83,7 +53,7 @@ export class DataService {
     return this.http.get<Classroom[]>(`${this.apiUrl}/salles`);
   }
 
-  createClassroom(classroom: { nomSalle: string }): Observable<Classroom> {
+  createClassroom(classroom: Classroom): Observable<Classroom> {
     return this.http.post<Classroom>(`${this.apiUrl}/salles`, classroom);
   }
 
@@ -100,12 +70,12 @@ export class DataService {
     return this.http.get<Major[]>(`${this.apiUrl}/filieres`);
   }
 
-  createMajor(major: Omit<Major, 'idFiliere'>): Observable<Major> {
+  createMajor(major: Major): Observable<Major> {
     return this.http.post<Major>(`${this.apiUrl}/filieres`, major);
   }
 
-  updateMajor(idFiliere: number, major: Omit<Major, 'idFiliere'>): Observable<Major> {
-    return this.http.put<Major>(`${this.apiUrl}/filieres/${idFiliere}`, major);
+  updateMajor(id: number, major: Major): Observable<Major> {
+    return this.http.put<Major>(`${this.apiUrl}/filieres/${id}`, major);
   }
 
   deleteMajor(idFiliere: number): Observable<void> {

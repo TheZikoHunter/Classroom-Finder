@@ -152,10 +152,10 @@ import { Major } from '../../models/major.model';
                 <input
                   type="text"
                   id="subjectName"
-                  name="name"
-                  [(ngModel)]="newEntity.name"
+                  name="nomMatiere"
+                  [(ngModel)]="newEntity.nomMatiere"
                   required
-                  #name="ngModel"
+                  #nomMatiere="ngModel"
                   class="form-control"
                 >
               </div>
@@ -176,7 +176,7 @@ import { Major } from '../../models/major.model';
               </thead>
               <tbody>
                 <tr *ngFor="let subject of subjects">
-                  <td>{{subject.name}}</td>
+                  <td>{{subject.nomMatiere}}</td>
                   <td>
                     <button class="btn-edit" (click)="editEntity(subject, 'subject')">Edit</button>
                     <button class="btn-delete" (click)="deleteEntity(subject.id, 'subject')">Delete</button>
@@ -351,6 +351,8 @@ export class EntityManagementComponent implements OnInit {
   classrooms: Classroom[] = [];
   majors: Major[] = [];
   subjects: Subject[] = [];
+  isEditing = false;
+  currentEditId: any = null;
 
   constructor(private dataService: DataService) {}
 
@@ -362,6 +364,8 @@ export class EntityManagementComponent implements OnInit {
     this.activeTab = tab;
     this.showAddForm = false;
     this.newEntity = {};
+    this.isEditing = false;
+    this.currentEditId = null;
   }
 
   loadData(): void {
@@ -380,26 +384,57 @@ export class EntityManagementComponent implements OnInit {
 
   onSubmit(type: string): void {
     if (type === 'classroom') {
-      this.dataService.createClassroom(this.newEntity).subscribe(() => {
-        this.resetForm();
-        this.loadData();
-      });
+      if (this.isEditing) {
+        this.dataService.updateClassroom(this.currentEditId, this.newEntity.nomSalle).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      } else {
+        this.dataService.createClassroom(this.newEntity).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      }
     } else if (type === 'major') {
-      this.dataService.createMajor(this.newEntity).subscribe(() => {
-        this.resetForm();
-        this.loadData();
-      });
+      if (this.isEditing) {
+        this.dataService.updateMajor(this.currentEditId, this.newEntity).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      } else {
+        this.dataService.createMajor(this.newEntity).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      }
     } else if (type === 'subject') {
-      this.dataService.createSubject(this.newEntity).subscribe(() => {
-        this.resetForm();
-        this.loadData();
-      });
+      if (this.isEditing) {
+        this.dataService.updateSubject(this.currentEditId, { nomMatiere: this.newEntity.nomMatiere }).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      } else {
+        this.dataService.createSubject({ nomMatiere: this.newEntity.nomMatiere }).subscribe(() => {
+          this.resetForm();
+          this.loadData();
+        });
+      }
     }
   }
 
   editEntity(entity: any, type: string): void {
     this.showAddForm = true;
-    this.newEntity = { ...entity };
+    this.isEditing = true;
+    if (type === 'classroom') {
+      this.currentEditId = entity.nomSalle;
+      this.newEntity = { nomSalle: entity.nomSalle };
+    } else if (type === 'major') {
+      this.currentEditId = entity.idFiliere;
+      this.newEntity = { ...entity };
+    } else if (type === 'subject') {
+      this.currentEditId = entity.id;
+      this.newEntity = { nomMatiere: entity.nomMatiere };
+    }
   }
 
   deleteEntity(id: any, type: string): void {
@@ -421,10 +456,14 @@ export class EntityManagementComponent implements OnInit {
   cancelAdd(): void {
     this.showAddForm = false;
     this.newEntity = {};
+    this.isEditing = false;
+    this.currentEditId = null;
   }
 
   resetForm(): void {
     this.showAddForm = false;
     this.newEntity = {};
+    this.isEditing = false;
+    this.currentEditId = null;
   }
 } 

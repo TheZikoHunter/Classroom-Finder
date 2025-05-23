@@ -1,9 +1,8 @@
 package com.spring.classroom_finder.model;
-import jakarta.persistence.*;
-
-import java.sql.Time;
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Horaire {
@@ -13,18 +12,15 @@ public class Horaire {
 
     private String heure_debut;
     private String heure_fin;
-    private String day;
-
-;
-
-    public Horaire(int id_horaire, String heure_debut, String heure_fin, String day) {
-        this.id_horaire = id_horaire;
-        this.heure_debut = heure_debut;
-        this.heure_fin = heure_fin;
-        this.day = day;
-    }
+    private String jour;
 
     public Horaire() {
+    }
+
+    public Horaire(String heure_debut, String heure_fin, String jour) {
+        this.heure_debut = heure_debut;
+        this.heure_fin = heure_fin;
+        this.jour = jour;
     }
 
     public int getId_horaire() {
@@ -51,12 +47,12 @@ public class Horaire {
         this.heure_fin = heure_fin;
     }
 
-    public String getDay() {
-        return day;
+    public String getJour() {
+        return jour;
     }
 
-    public void setDay(String day) {
-        this.day = day;
+    public void setJour(String jour) {
+        this.jour = jour;
     }
 }
 
