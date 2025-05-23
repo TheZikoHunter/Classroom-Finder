@@ -5,6 +5,7 @@ import java.util.List;
 @Entity
 public class Professeur {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id_professeur;
 
     private String email;

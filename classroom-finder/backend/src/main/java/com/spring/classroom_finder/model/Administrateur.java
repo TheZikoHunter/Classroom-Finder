@@ -5,6 +5,7 @@ import java.util.List;
 @Entity
 public class Administrateur {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id_administrateur;
     private String email;
     private String mot_de_passe;

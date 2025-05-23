@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 public class Horaire {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id_horaire;
 
     private String heure_debut;
