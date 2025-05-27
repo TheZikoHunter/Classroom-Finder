@@ -60,32 +60,29 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
             </div>
           </div>
 
-          <div class="days-selector">
-            <button 
-              *ngFor="let day of days" 
-              class="day-btn" 
-              [class.active]="selectedDay === day"
-              (click)="onDayChange(day)">
-              {{day}}
-            </button>
-          </div>
-
           <div class="timetable">
-            <div class="time-slots">
-              <div *ngFor="let slot of timeSlots" class="time-slot">
-                <div class="time-range">
-                  {{slot.startTime}} - {{slot.endTime}}
-                </div>
-                <div class="slot-details">
-                  <div class="subject">{{slot.subject?.nomMatiere || 'No subject assigned'}}</div>
-                  <div class="professor">{{slot.professor?.nomProfesseur || 'No professor assigned'}}</div>
-                  <div class="classroom">{{slot.classroom?.nomSalle || 'No classroom assigned'}}</div>
-                </div>
-                <div class="slot-actions">
-                  <button class="assign-btn" (click)="assignTimeSlot(slot)">Assign</button>
-                </div>
-              </div>
-            </div>
+            <table class="timetable-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th *ngFor="let day of days">{{day}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let range of timeRanges">
+                  <td class="time-cell">{{range.start}} - {{range.end}}</td>
+                  <td *ngFor="let day of days" class="slot-cell" (click)="assignTimeSlot(getTimeSlot(day, range))">
+                    <ng-container *ngIf="getTimeSlot(day, range) as slot">
+                      <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
+                        <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
+                        <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
+                        <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
+                      </div>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <app-assignment-dialog
@@ -203,65 +200,69 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
       cursor: pointer;
     }
 
-    .days-selector {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .day-btn {
-      padding: 8px 16px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background-color: white;
-      cursor: pointer;
-    }
-
-    .day-btn.active {
-      background-color: #2196F3;
-      color: white;
-      border-color: #2196F3;
-    }
-
     .timetable {
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       padding: 20px;
+      overflow-x: auto;
     }
 
-    .time-slots {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    .timetable-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
     }
 
-    .time-slot {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      border: 1px solid #eee;
-      border-radius: 4px;
+    .timetable-table th,
+    .timetable-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
     }
 
-    .time-range {
-      min-width: 150px;
+    .timetable-table th {
+      background-color: #f5f5f5;
       font-weight: 500;
     }
 
-    .slot-details {
-      flex: 1;
-      display: flex;
-      gap: 20px;
+    .time-cell {
+      background-color: #f9f9f9;
+      font-weight: 500;
+      min-width: 100px;
+      max-width: 100px;
     }
 
-    .assign-btn {
-      padding: 6px 12px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 4px;
+    .slot-cell {
+      min-width: 150px;
+      max-width: 150px;
       cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .slot-cell:hover {
+      background-color: #f5f5f5;
+    }
+
+    .slot-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.9em;
+    }
+
+    .slot-content .subject {
+      font-weight: 500;
+      color: #2196F3;
+    }
+
+    .slot-content .professor {
+      color: #666;
+    }
+
+    .slot-content .classroom {
+      color: #888;
+      font-size: 0.85em;
     }
   `]
 })
@@ -276,7 +277,6 @@ export class DashboardComponent implements OnInit {
   subjectFilter: { value: number; label: string; }[] = [];
   
   selectedMajor: Major | null = null;
-  selectedDay: string = 'Monday';
   timeSlots: TimeSlot[] = [];
   showAssignmentDialog = false;
   selectedTimeSlot: TimeSlot | null = null;
@@ -290,6 +290,7 @@ export class DashboardComponent implements OnInit {
     { start: '14:00', end: '16:00' },
     { start: '16:00', end: '18:00' }
   ];
+  timetableData: any[] = [];
 
   constructor(
     private dataService: DataService,
@@ -345,7 +346,7 @@ export class DashboardComponent implements OnInit {
 
   initializeTimeSlots(): void {
     this.timeSlots = this.timeRanges.map(range => ({
-      day: this.selectedDay,
+      day: this.days[0], // Use first day as default
       startTime: range.start,
       endTime: range.end,
       subject: null,
@@ -354,20 +355,109 @@ export class DashboardComponent implements OnInit {
     }));
   }
 
-  onDayChange(day: string): void {
-    this.selectedDay = day;
-    this.initializeTimeSlots();
+  getTimeSlot(day: string, range: { start: string; end: string }): TimeSlot | null {
+    return this.timeSlots.find(slot => 
+      slot.day.toLowerCase() === day.toLowerCase() && 
+      slot.startTime === range.start && 
+      slot.endTime === range.end
+    ) || null;
   }
 
   onMajorChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
     const majorId = parseInt(select.value);
-    this.selectedMajor = this.majors.find(m => m.idFiliere === majorId) || null;
+    if (majorId) {
+      this.dataService.getTimetableByMajor(majorId).subscribe(
+        (data) => {
+          console.log('API Response:', data);
+          
+          // Initialize empty time slots for all days
+          this.timeSlots = [];
+          this.days.forEach(day => {
+            this.timeRanges.forEach(range => {
+              this.timeSlots.push({
+                day,
+                startTime: range.start,
+                endTime: range.end,
+                subject: null,
+                professor: null,
+                classroom: null
+              });
+            });
+          });
+
+          // Map the API response to time slots
+          if (Array.isArray(data)) {
+            data.forEach(planning => {
+              if (planning && planning.horaire) {
+                const idHoraire = planning.horaire.idHoraire;
+                // Calculate day index (0-5) and time slot index (0-3)
+                const dayIndex = Math.floor((idHoraire - 1) / 4);
+                const timeSlotIndex = (idHoraire - 1) % 4;
+                
+                if (dayIndex >= 0 && dayIndex < this.days.length && 
+                    timeSlotIndex >= 0 && timeSlotIndex < this.timeRanges.length) {
+                  const timeSlot = this.timeSlots.find(slot => 
+                    slot.day === this.days[dayIndex] &&
+                    slot.startTime === this.timeRanges[timeSlotIndex].start &&
+                    slot.endTime === this.timeRanges[timeSlotIndex].end
+                  );
+
+                  if (timeSlot) {
+                    timeSlot.subject = planning.matiere;
+                    timeSlot.professor = planning.professeur;
+                    timeSlot.classroom = planning.salle;
+                  }
+                }
+              } else {
+                console.warn('Invalid planning data:', planning);
+              }
+            });
+          } else {
+            console.error('API response is not an array:', data);
+          }
+
+          console.log('Updated time slots:', this.timeSlots);
+        },
+        (error) => {
+          console.error('Error fetching timetable:', error);
+        }
+      );
+    } else {
+      // Clear time slots when no major is selected
+      this.timeSlots = [];
+      this.days.forEach(day => {
+        this.timeRanges.forEach(range => {
+          this.timeSlots.push({
+            day,
+            startTime: range.start,
+            endTime: range.end,
+            subject: null,
+            professor: null,
+            classroom: null
+          });
+        });
+      });
+    }
   }
 
-  assignTimeSlot(slot: TimeSlot): void {
-    this.selectedTimeSlot = slot;
-    this.showAssignmentDialog = true;
+  assignTimeSlot(slot: TimeSlot | null): void {
+    if (slot) {
+      this.selectedTimeSlot = slot;
+      this.showAssignmentDialog = true;
+    } else {
+      // Create a new time slot if none exists
+      const newSlot: TimeSlot = {
+        day: this.days[0], // Default to first day
+        startTime: this.timeRanges[0].start,
+        endTime: this.timeRanges[0].end,
+        subject: null,
+        professor: null,
+        classroom: null
+      };
+      this.selectedTimeSlot = newSlot;
+      this.showAssignmentDialog = true;
+    }
   }
 
   onAssignmentSave(updatedSlot: TimeSlot): void {
@@ -412,7 +502,7 @@ export class DashboardComponent implements OnInit {
 
   updateSubjectFilter(): void {
     this.subjectFilter = this.subjects.map(subject => ({
-      value: subject.idMatiere,
+      value: subject.id,
       label: subject.nomMatiere
     }));
   }

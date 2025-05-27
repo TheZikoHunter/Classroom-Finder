@@ -57,12 +57,12 @@ export class DataService {
     return this.http.post<Classroom>(`${this.apiUrl}/salles`, classroom);
   }
 
-  updateClassroom(oldNomSalle: string, newNomSalle: string): Observable<Classroom> {
-    return this.http.put<Classroom>(`${this.apiUrl}/salles/${oldNomSalle}`, { nomSalle: newNomSalle });
+  updateClassroom(id: number, classroom: Classroom): Observable<Classroom> {
+    return this.http.put<Classroom>(`${this.apiUrl}/salles/${id}`, classroom);
   }
 
-  deleteClassroom(nomSalle: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/salles/${nomSalle}`);
+  deleteClassroom(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/salles/${id}`);
   }
 
   // Major operations
@@ -80,5 +80,10 @@ export class DataService {
 
   deleteMajor(idFiliere: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/filieres/${idFiliere}`);
+  }
+
+  // Timetable operations
+  getTimetableByMajor(majorId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/plannings/recherche-par-filiere/${majorId}`);
   }
 }

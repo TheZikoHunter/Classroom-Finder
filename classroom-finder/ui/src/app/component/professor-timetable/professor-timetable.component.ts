@@ -151,17 +151,17 @@ export class ProfessorTimetableComponent implements OnInit {
         day: 'Monday',
         startTime: '09:00',
         endTime: '10:30',
-        subject: { idMatiere: 1, nomMatiere: 'Mathematics' },
+        subject: { id: 1, nomMatiere: 'Mathematics' },
         professor: null,
-        classroom: { nomSalle: 'Room 101' }
+        classroom: { id: 1, nomSalle: 'Room 101' }
       },
       {
         day: 'Monday',
         startTime: '11:00',
         endTime: '12:30',
-        subject: { idMatiere: 2, nomMatiere: 'Physics' },
+        subject: { id: 2, nomMatiere: 'Physics' },
         professor: null,
-        classroom: { nomSalle: 'Room 102' }
+        classroom: { id: 2, nomSalle: 'Room 102' }
       }
     ];
   }

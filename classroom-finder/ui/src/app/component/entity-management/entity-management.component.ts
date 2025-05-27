@@ -65,7 +65,7 @@ import { Major } from '../../models/major.model';
                   <td>{{classroom.nomSalle}}</td>
                   <td>
                     <button class="btn-edit" (click)="editEntity(classroom, 'classroom')">Edit</button>
-                    <button class="btn-delete" (click)="deleteEntity(classroom.nomSalle, 'classroom')">Delete</button>
+                    <button class="btn-delete" (click)="deleteEntity(classroom.id, 'classroom')">Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -179,7 +179,7 @@ import { Major } from '../../models/major.model';
                   <td>{{subject.nomMatiere}}</td>
                   <td>
                     <button class="btn-edit" (click)="editEntity(subject, 'subject')">Edit</button>
-                    <button class="btn-delete" (click)="deleteEntity(subject.idMatiere, 'subject')">Delete</button>
+                    <button class="btn-delete" (click)="deleteEntity(subject.id, 'subject')">Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -432,24 +432,33 @@ export class EntityManagementComponent implements OnInit {
       this.currentEditId = entity.idFiliere;
       this.newEntity = { ...entity };
     } else if (type === 'subject') {
-      this.currentEditId = entity.idMatiere;
+      this.currentEditId = entity.id;
       this.newEntity = { nomMatiere: entity.nomMatiere };
     }
   }
 
-  deleteEntity(id: any, type: string): void {
-    if (type === 'classroom') {
-      this.dataService.deleteClassroom(id).subscribe(() => {
-        this.loadData();
-      });
-    } else if (type === 'major') {
-      this.dataService.deleteMajor(id).subscribe(() => {
-        this.loadData();
-      });
-    } else if (type === 'subject') {
-      this.dataService.deleteSubject(id).subscribe(() => {
-        this.loadData();
-      });
+  deleteEntity(id: number, type: 'subject' | 'professor' | 'classroom' | 'major'): void {
+    if (confirm(`Are you sure you want to delete this ${type}?`)) {
+      switch (type) {
+        case 'subject':
+          this.dataService.deleteSubject(id).subscribe(() => {
+            this.loadData();
+          });
+          break;
+        case 'professor':
+          // Implement professor deletion logic
+          break;
+        case 'classroom':
+          this.dataService.deleteClassroom(id).subscribe(() => {
+            this.loadData();
+          });
+          break;
+        case 'major':
+          this.dataService.deleteMajor(id).subscribe(() => {
+            this.loadData();
+          });
+          break;
+      }
     }
   }
 

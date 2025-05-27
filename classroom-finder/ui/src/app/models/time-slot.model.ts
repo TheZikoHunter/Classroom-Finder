@@ -6,7 +6,7 @@ export interface TimeSlot {
   day: string;
   startTime: string;
   endTime: string;
-  subject: Subject | null;
-  professor: Professor | null;
-  classroom: Classroom | null;
+  subject?: Subject | null;
+  professor?: Professor | null;
+  classroom?: Classroom | null;
 } 

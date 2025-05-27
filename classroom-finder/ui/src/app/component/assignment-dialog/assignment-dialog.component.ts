@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Professor } from '../../models/professor.model';
@@ -28,7 +28,7 @@ import { TimeSlot } from '../../models/time-slot.model';
           <select [(ngModel)]="selectedProfessor" class="form-control">
             <option [ngValue]="null">Select Professor</option>
             <option *ngFor="let professor of professors" [ngValue]="professor">
-              {{professor.nomProfesseur}}
+              {{professor.nomProfesseur}} {{professor.prenomProfesseur}}
             </option>
           </select>
         </div>
@@ -131,10 +131,11 @@ export class AssignmentDialogComponent {
   selectedClassroom: Classroom | null = null;
 
   ngOnInit() {
-    // Initialize with existing values if any
-    this.selectedSubject = this.timeSlot.subject;
-    this.selectedProfessor = this.timeSlot.professor;
-    this.selectedClassroom = this.timeSlot.classroom;
+    if (this.timeSlot) {
+      this.selectedSubject = this.timeSlot.subject || null;
+      this.selectedProfessor = this.timeSlot.professor || null;
+      this.selectedClassroom = this.timeSlot.classroom || null;
+    }
   }
 
   isValid(): boolean {
@@ -142,9 +143,11 @@ export class AssignmentDialogComponent {
   }
 
   onSave() {
-    if (this.isValid()) {
+    if (this.timeSlot) {
       const updatedSlot: TimeSlot = {
-        ...this.timeSlot,
+        day: this.timeSlot.day,
+        startTime: this.timeSlot.startTime,
+        endTime: this.timeSlot.endTime,
         subject: this.selectedSubject,
         professor: this.selectedProfessor,
         classroom: this.selectedClassroom
