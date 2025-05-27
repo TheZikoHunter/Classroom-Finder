@@ -1,17 +1,18 @@
 package com.spring.classroom_finder.repository;
 
-import com.spring.classroom_finder.model.Planning;
-import com.spring.classroom_finder.model.Filiere;
-import com.spring.classroom_finder.model.Professeur;
-import com.spring.classroom_finder.model.Horaire;
-import com.spring.classroom_finder.model.Salle;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Set;
+import com.spring.classroom_finder.model.Filiere;
+import com.spring.classroom_finder.model.Horaire;
+import com.spring.classroom_finder.model.Planning;
+import com.spring.classroom_finder.model.Professeur;
+import com.spring.classroom_finder.model.Salle;
 
 @Repository
 public interface PlanningRepository extends JpaRepository<Planning, Long> {
@@ -34,4 +35,8 @@ public interface PlanningRepository extends JpaRepository<Planning, Long> {
     // Custom query to find all distinct filieres (majors) that a professor teaches
     @Query("SELECT DISTINCT p.filiere FROM Planning p WHERE p.professeur = :professeur")
     Set<Filiere> findAllFilieresByProfesseur(@Param("professeur") Professeur professeur);
+
+
+    
+
 }

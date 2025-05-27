@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, LoginCredentials } from '../../services/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -14,19 +14,19 @@ import { AuthService, LoginCredentials } from '../../services/auth.service';
         <h1>Classroom Finder</h1>
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
           <div class="form-group">
-            <label for="username">Username</label>
+            <label for="email">Email</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              [(ngModel)]="credentials.username"
+              type="email"
+              id="email"
+              name="email"
+              [(ngModel)]="email"
               required
-              #username="ngModel"
+              #emailInput="ngModel"
               class="form-control"
-              [class.is-invalid]="username.invalid && username.touched"
+              [class.is-invalid]="emailInput.invalid && emailInput.touched"
             >
-            <div class="invalid-feedback" *ngIf="username.invalid && username.touched">
-              Username is required
+            <div class="invalid-feedback" *ngIf="emailInput.invalid && emailInput.touched">
+              Please enter a valid email address
             </div>
           </div>
 
@@ -36,13 +36,13 @@ import { AuthService, LoginCredentials } from '../../services/auth.service';
               type="password"
               id="password"
               name="password"
-              [(ngModel)]="credentials.password"
+              [(ngModel)]="password"
               required
-              #password="ngModel"
+              #passwordInput="ngModel"
               class="form-control"
-              [class.is-invalid]="password.invalid && password.touched"
+              [class.is-invalid]="passwordInput.invalid && passwordInput.touched"
             >
-            <div class="invalid-feedback" *ngIf="password.invalid && password.touched">
+            <div class="invalid-feedback" *ngIf="passwordInput.invalid && passwordInput.touched">
               Password is required
             </div>
           </div>
@@ -145,10 +145,8 @@ import { AuthService, LoginCredentials } from '../../services/auth.service';
   `]
 })
 export class LoginComponent {
-  credentials: LoginCredentials = {
-    username: '',
-    password: ''
-  };
+  email: string = '';
+  password: string = '';
   errorMessage: string = '';
 
   constructor(
@@ -158,12 +156,13 @@ export class LoginComponent {
 
   onSubmit(): void {
     this.errorMessage = '';
-    this.authService.login(this.credentials).subscribe({
+    this.authService.login(this.email, this.password).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        // Navigation is handled by the auth service based on user role
       },
-      error: (error) => {
-        this.errorMessage = 'Invalid username or password';
+      error: (errorMessage: string) => {
+        console.error('Login error:', errorMessage);
+        this.errorMessage = errorMessage;
       }
     });
   }

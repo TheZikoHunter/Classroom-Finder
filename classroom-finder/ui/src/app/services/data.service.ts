@@ -19,16 +19,16 @@ export class DataService {
     return this.http.get<Professor[]>(`${this.apiUrl}/professeurs`);
   }
 
-  createProfessor(professor: Professor): Observable<Professor> {
+  createProfessor(professor: Omit<Professor, 'id_professeur'>): Observable<Professor> {
     return this.http.post<Professor>(`${this.apiUrl}/professeurs`, professor);
   }
 
   updateProfessor(professor: Professor): Observable<Professor> {
-    return this.http.put<Professor>(`${this.apiUrl}/professeurs/${professor.id}`, professor);
+    return this.http.put<Professor>(`${this.apiUrl}/professeurs/${professor.id_professeur}`, professor);
   }
 
-  deleteProfessor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/professeurs/${id}`);
+  deleteProfessor(id_professeur: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/professeurs/${id_professeur}`);
   }
 
   // Subject operations
@@ -40,12 +40,12 @@ export class DataService {
     return this.http.post<Subject>(`${this.apiUrl}/matieres`, subject);
   }
 
-  updateSubject(id: number, subject: { nomMatiere: string }): Observable<Subject> {
-    return this.http.put<Subject>(`${this.apiUrl}/matieres/${id}`, subject);
+  updateSubject(idMatiere: number, subject: { nomMatiere: string }): Observable<Subject> {
+    return this.http.put<Subject>(`${this.apiUrl}/matieres/${idMatiere}`, subject);
   }
 
-  deleteSubject(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/matieres/${id}`);
+  deleteSubject(idMatiere: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/matieres/${idMatiere}`);
   }
 
   // Classroom operations

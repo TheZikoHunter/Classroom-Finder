@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 public class Horaire {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_horaire;
+    private int idHoraire;
 
     private String heure_debut;
     private String heure_fin;
@@ -23,12 +23,12 @@ public class Horaire {
         this.jour = jour;
     }
 
-    public int getId_horaire() {
-        return id_horaire;
+    public int getidHoraire() {
+        return idHoraire;
     }
 
-    public void setId_horaire(int id_horaire) {
-        this.id_horaire = id_horaire;
+    public void setidHoraire(int idHoraire) {
+        this.idHoraire = idHoraire;
     }
 
     public String getHeure_debut() {

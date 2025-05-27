@@ -1,9 +1,15 @@
 package com.spring.classroom_finder.model;
 
-import jakarta.persistence.*;
-
 import java.util.List;
 import java.util.Objects;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "plannings")
@@ -21,7 +27,7 @@ public class Planning {
     private Matiere matiere;
 
     @ManyToOne
-    @JoinColumn(name = "id_horaire", nullable = false)
+    @JoinColumn(name = "idHoraire", nullable = false)
     private Horaire horaire;
 
     @ManyToOne

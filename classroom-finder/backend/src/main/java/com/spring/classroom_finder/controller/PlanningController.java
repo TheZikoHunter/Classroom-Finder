@@ -18,11 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.classroom_finder.model.Filiere;
+import com.spring.classroom_finder.model.Horaire;
+import com.spring.classroom_finder.model.Matiere;
 import com.spring.classroom_finder.model.Planning;
 import com.spring.classroom_finder.model.Professeur;
+import com.spring.classroom_finder.model.Salle;
 import com.spring.classroom_finder.repository.FiliereRepository;
+import com.spring.classroom_finder.repository.HoraireRepository;
+import com.spring.classroom_finder.repository.MatiereRepository;
 import com.spring.classroom_finder.repository.PlanningRepository;
 import com.spring.classroom_finder.repository.ProfesseurRepository;
+import com.spring.classroom_finder.repository.SalleRepository;
 
 @RestController
 @RequestMapping("/api/plannings")
@@ -32,15 +38,25 @@ public class PlanningController {
     private final PlanningRepository planningRepository;
     private final ProfesseurRepository professeurRepository;
     private final FiliereRepository filiereRepository;
+    private final MatiereRepository matiereRepository;
+    private final HoraireRepository horaireRepository;
+    private final SalleRepository salleRepository;
 
     @Autowired
     public PlanningController(
             PlanningRepository planningRepository,
             ProfesseurRepository professeurRepository,
-            FiliereRepository filiereRepository) {
+            FiliereRepository filiereRepository,
+            MatiereRepository matiereRepository,
+            HoraireRepository horaireRepository,
+            SalleRepository salleRepository
+            ) {
         this.planningRepository = planningRepository;
         this.professeurRepository = professeurRepository;
         this.filiereRepository = filiereRepository;
+        this.matiereRepository = matiereRepository;
+        this.horaireRepository = horaireRepository;
+        this.salleRepository = salleRepository;
     }
 
     @GetMapping
@@ -57,14 +73,121 @@ public class PlanningController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createPlanning(@RequestBody Planning planning) {
+    public ResponseEntity<?> createPlanning(@RequestBody PlanningCreateRequest request) {
         try {
+            // Validate that all required IDs are provided
+            if (request.getIdMatiere() == null || request.getIdHoraire() == null || 
+                request.getIdProfesseur() == null || request.getIdFiliere() == null ||
+                request.getSalleId() == null) {
+                return new ResponseEntity<>("All IDs must be provided", HttpStatus.BAD_REQUEST);
+            }
+    
+            // Find entities by their IDs
+            Optional<Matiere> matiereOpt = matiereRepository.findById(request.getIdMatiere());
+            Optional<Horaire> horaireOpt = horaireRepository.findById(request.getIdHoraire());
+            Optional<Professeur> professeurOpt = professeurRepository.findById(request.getIdProfesseur());
+            Optional<Filiere> filiereOpt = filiereRepository.findById(request.getIdFiliere());
+            Optional<Salle> salleOpt = salleRepository.findById(request.getSalleId());
+    
+            // Check if all entities exist
+            if (matiereOpt.isEmpty()) {
+                return new ResponseEntity<>("Matiere with ID " + request.getIdMatiere() + " not found", HttpStatus.NOT_FOUND);
+            }
+            if (horaireOpt.isEmpty()) {
+                return new ResponseEntity<>("Horaire with ID " + request.getIdHoraire() + " not found", HttpStatus.NOT_FOUND);
+            }
+            if (professeurOpt.isEmpty()) {
+                return new ResponseEntity<>("Professeur with ID " + request.getIdProfesseur() + " not found", HttpStatus.NOT_FOUND);
+            }
+            if (filiereOpt.isEmpty()) {
+                return new ResponseEntity<>("Filiere with ID " + request.getIdFiliere() + " not found", HttpStatus.NOT_FOUND);
+            }
+            if (salleOpt.isEmpty()) {
+                return new ResponseEntity<>("Salle with ID " + request.getSalleId() + " not found", HttpStatus.NOT_FOUND);
+            }
+    
+            // Create new Planning object with found entities
+            Planning planning = new Planning();
+            planning.setMatiere(matiereOpt.get());
+            planning.setHoraire(horaireOpt.get());
+            planning.setProfesseur(professeurOpt.get());
+            planning.setFiliere(filiereOpt.get());
+            planning.setSalle(salleOpt.get());
+    
             // Check for conflicts before saving
             validateNoConflicts(planning);
+            
+            // Save the planning
             Planning savedPlanning = planningRepository.save(planning);
             return new ResponseEntity<>(savedPlanning, HttpStatus.CREATED);
+            
         } catch (PlanningConflictException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error creating planning: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    // Request DTO for creating planning with IDs
+    public static class PlanningCreateRequest {
+        private Integer idMatiere;
+        private Integer idHoraire;
+        private Integer idProfesseur;
+        private Integer idFiliere;
+        private String salleId; // Assuming Salle ID is String based on your previous code
+    
+        // Default constructor
+        public PlanningCreateRequest() {}
+    
+        // Constructor with all parameters
+        public PlanningCreateRequest(Integer idMatiere, Integer idHoraire, Integer idProfesseur, 
+                                   Integer idFiliere, String salleId) {
+            this.idMatiere = idMatiere;
+            this.idHoraire = idHoraire;
+            this.idProfesseur = idProfesseur;
+            this.idFiliere = idFiliere;
+            this.salleId = salleId;
+        }
+    
+        // Getters and Setters
+        public Integer getIdMatiere() {
+            return idMatiere;
+        }
+    
+        public void setIdMatiere(Integer idMatiere) {
+            this.idMatiere = idMatiere;
+        }
+    
+        public Integer getIdHoraire() {
+            return idHoraire;
+        }
+    
+        public void setIdHoraire(Integer idHoraire) {
+            this.idHoraire = idHoraire;
+        }
+    
+        public Integer getIdProfesseur() {
+            return idProfesseur;
+        }
+    
+        public void setIdProfesseur(Integer idProfesseur) {
+            this.idProfesseur = idProfesseur;
+        }
+    
+        public Integer getIdFiliere() {
+            return idFiliere;
+        }
+    
+        public void setIdFiliere(Integer idFiliere) {
+            this.idFiliere = idFiliere;
+        }
+    
+        public String getSalleId() {
+            return salleId;
+        }
+    
+        public void setSalleId(String salleId) {
+            this.salleId = salleId;
         }
     }
 

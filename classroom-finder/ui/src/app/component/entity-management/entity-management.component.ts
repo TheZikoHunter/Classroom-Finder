@@ -179,7 +179,7 @@ import { Major } from '../../models/major.model';
                   <td>{{subject.nomMatiere}}</td>
                   <td>
                     <button class="btn-edit" (click)="editEntity(subject, 'subject')">Edit</button>
-                    <button class="btn-delete" (click)="deleteEntity(subject.id, 'subject')">Delete</button>
+                    <button class="btn-delete" (click)="deleteEntity(subject.idMatiere, 'subject')">Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -432,7 +432,7 @@ export class EntityManagementComponent implements OnInit {
       this.currentEditId = entity.idFiliere;
       this.newEntity = { ...entity };
     } else if (type === 'subject') {
-      this.currentEditId = entity.id;
+      this.currentEditId = entity.idMatiere;
       this.newEntity = { nomMatiere: entity.nomMatiere };
     }
   }

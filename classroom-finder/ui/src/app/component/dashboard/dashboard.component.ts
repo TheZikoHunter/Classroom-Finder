@@ -77,7 +77,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
                   {{slot.startTime}} - {{slot.endTime}}
                 </div>
                 <div class="slot-details">
-                  <div class="subject">{{slot.subject?.name || 'No subject assigned'}}</div>
+                  <div class="subject">{{slot.subject?.nomMatiere || 'No subject assigned'}}</div>
                   <div class="professor">{{slot.professor?.nomProfesseur || 'No professor assigned'}}</div>
                   <div class="classroom">{{slot.classroom?.nomSalle || 'No classroom assigned'}}</div>
                 </div>
@@ -412,8 +412,8 @@ export class DashboardComponent implements OnInit {
 
   updateSubjectFilter(): void {
     this.subjectFilter = this.subjects.map(subject => ({
-      value: subject.id,
-      label: subject.name
+      value: subject.idMatiere,
+      label: subject.nomMatiere
     }));
   }
 } 

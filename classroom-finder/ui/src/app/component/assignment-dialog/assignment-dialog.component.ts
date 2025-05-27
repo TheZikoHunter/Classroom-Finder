@@ -19,7 +19,7 @@ import { TimeSlot } from '../../models/time-slot.model';
           <select [(ngModel)]="selectedSubject" class="form-control">
             <option [ngValue]="null">Select Subject</option>
             <option *ngFor="let subject of subjects" [ngValue]="subject">
-              {{subject.name}} ({{subject.code}})
+              {{subject.nomMatiere}}
             </option>
           </select>
         </div>
