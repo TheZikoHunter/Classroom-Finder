@@ -6,6 +6,14 @@ import { Subject } from '../models/subject.model';
 import { Classroom } from '../models/classroom.model';
 import { Major } from '../models/major.model';
 
+export interface Planning {
+  idMatiere: number;
+  idHoraire: number;
+  idProfesseur: number;
+  idFiliere: number;
+  salleId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -85,5 +93,10 @@ export class DataService {
   // Timetable operations
   getTimetableByMajor(majorId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/plannings/recherche-par-filiere/${majorId}`);
+  }
+
+  // Planning operations
+  createPlanning(planning: Planning): Observable<Planning> {
+    return this.http.post<Planning>(`${this.apiUrl}/plannings`, planning);
   }
 }

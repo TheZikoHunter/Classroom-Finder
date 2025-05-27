@@ -5,6 +5,7 @@ import { Professor } from '../../models/professor.model';
 import { Subject } from '../../models/subject.model';
 import { Classroom } from '../../models/classroom.model';
 import { TimeSlot } from '../../models/time-slot.model';
+import { DataService, Planning } from '../../services/data.service';
 
 @Component({
   selector: 'app-assignment-dialog',
@@ -117,11 +118,12 @@ import { TimeSlot } from '../../models/time-slot.model';
     }
   `]
 })
-export class AssignmentDialogComponent {
+export class AssignmentDialogComponent implements OnInit {
   @Input() timeSlot!: TimeSlot;
   @Input() subjects: Subject[] = [];
   @Input() professors: Professor[] = [];
   @Input() classrooms: Classroom[] = [];
+  @Input() selectedMajorId: number = 0;
   
   @Output() save = new EventEmitter<TimeSlot>();
   @Output() cancel = new EventEmitter<void>();
@@ -129,6 +131,8 @@ export class AssignmentDialogComponent {
   selectedSubject: Subject | null = null;
   selectedProfessor: Professor | null = null;
   selectedClassroom: Classroom | null = null;
+
+  constructor(private dataService: DataService) {}
 
   ngOnInit() {
     if (this.timeSlot) {
@@ -139,20 +143,86 @@ export class AssignmentDialogComponent {
   }
 
   isValid(): boolean {
-    return !!(this.selectedSubject && this.selectedProfessor && this.selectedClassroom);
+    return !!(this.selectedSubject && this.selectedProfessor && this.selectedClassroom && this.selectedMajorId > 0);
+  }
+
+  private getHoraireId(): number {
+    const day = this.timeSlot.day.toLowerCase();
+    const startTime = this.timeSlot.startTime;
+    const endTime = this.timeSlot.endTime;
+
+    // Monday
+    if (day === 'monday') {
+      if (startTime === '08:30' && endTime === '10:30') return 1;
+      if (startTime === '10:30' && endTime === '12:30') return 2;
+      if (startTime === '14:00' && endTime === '16:00') return 3;
+      if (startTime === '16:00' && endTime === '18:00') return 4;
+    }
+    // Tuesday
+    if (day === 'tuesday') {
+      if (startTime === '08:30' && endTime === '10:30') return 5;
+      if (startTime === '10:30' && endTime === '12:30') return 6;
+      if (startTime === '14:00' && endTime === '16:00') return 7;
+      if (startTime === '16:00' && endTime === '18:00') return 8;
+    }
+    // Wednesday
+    if (day === 'wednesday') {
+      if (startTime === '08:30' && endTime === '10:30') return 9;
+      if (startTime === '10:30' && endTime === '12:30') return 10;
+      if (startTime === '14:00' && endTime === '16:00') return 11;
+      if (startTime === '16:00' && endTime === '18:00') return 12;
+    }
+    // Thursday
+    if (day === 'thursday') {
+      if (startTime === '08:30' && endTime === '10:30') return 13;
+      if (startTime === '10:30' && endTime === '12:30') return 14;
+      if (startTime === '14:00' && endTime === '16:00') return 15;
+      if (startTime === '16:00' && endTime === '18:00') return 16;
+    }
+    // Friday
+    if (day === 'friday') {
+      if (startTime === '08:30' && endTime === '10:30') return 17;
+      if (startTime === '10:30' && endTime === '12:30') return 18;
+      if (startTime === '14:00' && endTime === '16:00') return 19;
+      if (startTime === '16:00' && endTime === '18:00') return 20;
+    }
+
+    return 0; // Invalid time slot
   }
 
   onSave() {
-    if (this.timeSlot) {
-      const updatedSlot: TimeSlot = {
-        day: this.timeSlot.day,
-        startTime: this.timeSlot.startTime,
-        endTime: this.timeSlot.endTime,
-        subject: this.selectedSubject,
-        professor: this.selectedProfessor,
-        classroom: this.selectedClassroom
+    if (this.isValid()) {
+      const horaireId = this.getHoraireId();
+      if (horaireId === 0) {
+        alert('Invalid time slot');
+        return;
+      }
+
+      const planning: Planning = {
+        idMatiere: this.selectedSubject!.id,
+        idHoraire: horaireId,
+        idProfesseur: this.selectedProfessor!.id_professeur,
+        idFiliere: this.selectedMajorId,
+        salleId: this.selectedClassroom!.nomSalle
       };
-      this.save.emit(updatedSlot);
+
+      this.dataService.createPlanning(planning).subscribe({
+        next: (response) => {
+          const updatedSlot: TimeSlot = {
+            day: this.timeSlot.day,
+            startTime: this.timeSlot.startTime,
+            endTime: this.timeSlot.endTime,
+            subject: this.selectedSubject,
+            professor: this.selectedProfessor,
+            classroom: this.selectedClassroom
+          };
+          this.save.emit(updatedSlot);
+        },
+        error: (error) => {
+          console.error('Error creating planning:', error);
+          alert('Failed to save the time slot assignment');
+        }
+      });
     }
   }
 

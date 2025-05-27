@@ -91,6 +91,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
             [subjects]="subjects"
             [professors]="professors"
             [classrooms]="classrooms"
+            [selectedMajorId]="selectedMajorId"
             (save)="onAssignmentSave($event)"
             (cancel)="onAssignmentCancel()">
           </app-assignment-dialog>
@@ -291,6 +292,7 @@ export class DashboardComponent implements OnInit {
     { start: '16:00', end: '18:00' }
   ];
   timetableData: any[] = [];
+  selectedMajorId: number = 0;
 
   constructor(
     private dataService: DataService,
@@ -366,6 +368,7 @@ export class DashboardComponent implements OnInit {
   onMajorChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
     const majorId = parseInt(select.value);
+    this.selectedMajorId = majorId;
     if (majorId) {
       this.dataService.getTimetableByMajor(majorId).subscribe(
         (data) => {
@@ -473,13 +476,12 @@ export class DashboardComponent implements OnInit {
     
     this.showAssignmentDialog = false;
     this.selectedTimeSlot = null;
-    this.loadData();
+
   }
 
   onAssignmentCancel(): void {
     this.showAssignmentDialog = false;
     this.selectedTimeSlot = null;
-    this.loadData();
   }
 
   saveTimetable(): void {
