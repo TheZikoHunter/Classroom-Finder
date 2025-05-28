@@ -42,6 +42,11 @@ import { DataService, Planning } from '../../services/data.service';
             </option>
           </select>
         </div>
+        <div class="form-group" *ngIf="showReservationDate">
+          <label>Reservation Date (Optional):</label>
+          <input type="date" [(ngModel)]="reservationDate" class="form-control" [min]="minDate">
+          <small class="help-text">Leave empty for permanent assignment</small>
+        </div>
         <div class="dialog-actions">
           <button class="btn-cancel" (click)="onCancel()">Cancel</button>
           <button class="btn-save" (click)="onSave()" [disabled]="!isValid()">Save</button>
@@ -116,6 +121,12 @@ import { DataService, Planning } from '../../services/data.service';
       background: #ccc;
       cursor: not-allowed;
     }
+
+    .help-text {
+      color: #666;
+      font-size: 0.8em;
+      margin-top: 4px;
+    }
   `]
 })
 export class AssignmentDialogComponent implements OnInit {
@@ -125,6 +136,7 @@ export class AssignmentDialogComponent implements OnInit {
   @Input() classrooms: Classroom[] = [];
   @Input() selectedMajorId: number = 0;
   @Input() hideProfessorSelect: boolean = false;
+  @Input() showReservationDate: boolean = false;
   
   @Output() save = new EventEmitter<TimeSlot>();
   @Output() cancel = new EventEmitter<void>();
@@ -132,14 +144,21 @@ export class AssignmentDialogComponent implements OnInit {
   selectedSubject: Subject | null = null;
   selectedProfessor: Professor | null = null;
   selectedClassroom: Classroom | null = null;
+  reservationDate: string | null = null;
+  minDate: string;
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) {
+    // Set minimum date to today
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+  }
 
   ngOnInit() {
     if (this.timeSlot) {
       this.selectedSubject = this.timeSlot.subject || null;
       this.selectedProfessor = this.timeSlot.professor || null;
       this.selectedClassroom = this.timeSlot.classroom || null;
+      this.reservationDate = this.timeSlot.reservationDate || null;
     }
   }
 
@@ -224,7 +243,8 @@ export class AssignmentDialogComponent implements OnInit {
             endTime: this.timeSlot.endTime,
             subject: this.selectedSubject,
             professor: this.hideProfessorSelect ? this.professors[0] : this.selectedProfessor,
-            classroom: this.selectedClassroom
+            classroom: this.selectedClassroom,
+            reservationDate: this.reservationDate
           };
           this.save.emit(updatedSlot);
         },

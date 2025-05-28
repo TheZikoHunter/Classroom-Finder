@@ -9,4 +9,5 @@ export interface TimeSlot {
   subject?: Subject | null;
   professor?: Professor | null;
   classroom?: Classroom | null;
+  reservationDate?: string | null; // ISO date string for temporary reservations
 } 

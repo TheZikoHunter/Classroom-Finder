@@ -85,12 +85,16 @@ interface Classroom {
                   <td class="time-cell">{{range.start}} - {{range.end}}</td>
                   <td *ngFor="let day of days" class="slot-cell" 
                       [class.my-slot]="getTimeSlot(day, range)?.professor?.id_professeur === currentProfessor?.id_professeur"
+                      [class.temporary]="getTimeSlot(day, range)?.reservationDate"
                       (click)="assignTimeSlot(getTimeSlot(day, range))">
                     <ng-container *ngIf="getTimeSlot(day, range) as slot">
                       <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
                         <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
                         <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
                         <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
+                        <div *ngIf="slot.reservationDate" class="reservation-date">
+                          Reserved for: {{slot.reservationDate | date}}
+                        </div>
                       </div>
                     </ng-container>
                   </td>
@@ -107,6 +111,7 @@ interface Classroom {
             [classrooms]="classrooms"
             [selectedMajorId]="selectedMajorId"
             [hideProfessorSelect]="true"
+            [showReservationDate]="true"
             (save)="onAssignmentSave($event)"
             (cancel)="onAssignmentCancel()">
           </app-assignment-dialog>
@@ -214,6 +219,15 @@ interface Classroom {
       background-color: #bbdefb;
     }
 
+    .slot-cell.temporary {
+      background-color: #fff3e0;
+      border-color: #ff9800;
+    }
+
+    .slot-cell.temporary:hover {
+      background-color: #ffe0b2;
+    }
+
     .slot-content {
       display: flex;
       flex-direction: column;
@@ -233,6 +247,13 @@ interface Classroom {
     .slot-content .classroom {
       color: #888;
       font-size: 0.85em;
+    }
+
+    .reservation-date {
+      font-size: 0.8em;
+      color: #ff9800;
+      margin-top: 4px;
+      font-style: italic;
     }
   `]
 })
