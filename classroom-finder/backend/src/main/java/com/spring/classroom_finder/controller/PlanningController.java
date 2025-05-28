@@ -1,5 +1,6 @@
 package com.spring.classroom_finder.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,12 +23,14 @@ import com.spring.classroom_finder.model.Horaire;
 import com.spring.classroom_finder.model.Matiere;
 import com.spring.classroom_finder.model.Planning;
 import com.spring.classroom_finder.model.Professeur;
+import com.spring.classroom_finder.model.Reservation;
 import com.spring.classroom_finder.model.Salle;
 import com.spring.classroom_finder.repository.FiliereRepository;
 import com.spring.classroom_finder.repository.HoraireRepository;
 import com.spring.classroom_finder.repository.MatiereRepository;
 import com.spring.classroom_finder.repository.PlanningRepository;
 import com.spring.classroom_finder.repository.ProfesseurRepository;
+import com.spring.classroom_finder.repository.ReservationRepository;
 import com.spring.classroom_finder.repository.SalleRepository;
 
 @RestController
@@ -36,6 +39,7 @@ import com.spring.classroom_finder.repository.SalleRepository;
 public class PlanningController {
 
     private final PlanningRepository planningRepository;
+    private final ReservationRepository reservationRepository;
     private final ProfesseurRepository professeurRepository;
     private final FiliereRepository filiereRepository;
     private final MatiereRepository matiereRepository;
@@ -45,6 +49,7 @@ public class PlanningController {
     @Autowired
     public PlanningController(
             PlanningRepository planningRepository,
+            ReservationRepository reservationRepository,
             ProfesseurRepository professeurRepository,
             FiliereRepository filiereRepository,
             MatiereRepository matiereRepository,
@@ -52,6 +57,7 @@ public class PlanningController {
             SalleRepository salleRepository
             ) {
         this.planningRepository = planningRepository;
+        this.reservationRepository = reservationRepository;
         this.professeurRepository = professeurRepository;
         this.filiereRepository = filiereRepository;
         this.matiereRepository = matiereRepository;
@@ -105,26 +111,48 @@ public class PlanningController {
             if (salleOpt.isEmpty()) {
                 return new ResponseEntity<>("Salle with ID " + request.getSalleId() + " not found", HttpStatus.NOT_FOUND);
             }
-    
-            // Create new Planning object with found entities
-            Planning planning = new Planning();
-            planning.setMatiere(matiereOpt.get());
-            planning.setHoraire(horaireOpt.get());
-            planning.setProfesseur(professeurOpt.get());
-            planning.setFiliere(filiereOpt.get());
-            planning.setSalle(salleOpt.get());
-    
-            // Check for conflicts before saving
-            validateNoConflicts(planning);
-            
-            // Save the planning
-            Planning savedPlanning = planningRepository.save(planning);
-            return new ResponseEntity<>(savedPlanning, HttpStatus.CREATED);
+
+            // Check if the current user is a professor
+            Professeur professeur = professeurOpt.get();
+            if (professeur != null) {
+                // Create a reservation instead of a planning
+                Reservation reservation = new Reservation();
+                reservation.setMatiere(matiereOpt.get());
+                reservation.setHoraire(horaireOpt.get());
+                reservation.setProfesseur(professeur);
+                reservation.setFiliere(filiereOpt.get());
+                reservation.setSalle(salleOpt.get());
+                reservation.setReservationDate(LocalDate.now()); // Set current date
+
+                // Check for conflicts before saving
+                validateNoReservationConflicts(reservation);
+                
+                // Save the reservation
+                Reservation savedReservation = reservationRepository.save(reservation);
+                return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
+            } else {
+                // Create new Planning object with found entities
+                Planning planning = new Planning();
+                planning.setMatiere(matiereOpt.get());
+                planning.setHoraire(horaireOpt.get());
+                planning.setProfesseur(professeurOpt.get());
+                planning.setFiliere(filiereOpt.get());
+                planning.setSalle(salleOpt.get());
+        
+                // Check for conflicts before saving
+                validateNoConflicts(planning);
+                
+                // Save the planning
+                Planning savedPlanning = planningRepository.save(planning);
+                return new ResponseEntity<>(savedPlanning, HttpStatus.CREATED);
+            }
             
         } catch (PlanningConflictException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        } catch (ReservationConflictException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         } catch (Exception e) {
-            return new ResponseEntity<>("Error creating planning: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error creating planning/reservation: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -287,11 +315,52 @@ public class PlanningController {
         }
     }
 
+    private void validateNoReservationConflicts(Reservation reservation) throws ReservationConflictException {
+        // Check if professor is already scheduled for this time slot and date
+        List<Reservation> professorConflicts = reservationRepository.findByProfesseurAndHoraireAndReservationDate(
+                reservation.getProfesseur(), reservation.getHoraire(), reservation.getReservationDate());
+
+        // Filter out the current reservation if it's an update
+        professorConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
+
+        if (!professorConflicts.isEmpty()) {
+            throw new ReservationConflictException("Professor is already scheduled for this time slot and date");
+        }
+
+        // Check if classroom is already booked for this time slot and date
+        List<Reservation> salleConflicts = reservationRepository.findBySalleAndHoraireAndReservationDate(
+                reservation.getSalle(), reservation.getHoraire(), reservation.getReservationDate());
+
+        // Filter out the current reservation if it's an update
+        salleConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
+
+        if (!salleConflicts.isEmpty()) {
+            throw new ReservationConflictException("Classroom is already booked for this time slot and date");
+        }
+
+        // Check if the filiere already has a class scheduled for this time slot and date
+        List<Reservation> filiereConflicts = reservationRepository.findByFiliereAndHoraireAndReservationDate(
+                reservation.getFiliere(), reservation.getHoraire(), reservation.getReservationDate());
+
+        // Filter out the current reservation if it's an update
+        filiereConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
+
+        if (!filiereConflicts.isEmpty()) {
+            throw new ReservationConflictException("Major already has a class scheduled for this time slot and date");
+        }
+    }
+
     /**
      * Custom exception for planning conflicts
      */
     public static class PlanningConflictException extends Exception {
         public PlanningConflictException(String message) {
+            super(message);
+        }
+    }
+
+    public static class ReservationConflictException extends Exception {
+        public ReservationConflictException(String message) {
             super(message);
         }
     }

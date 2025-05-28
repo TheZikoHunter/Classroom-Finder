@@ -3,9 +3,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { DataService } from '../../services/data.service';
 
 interface Planning {
   idPlanning: number;
+  type: 'planning';
   salle: {
     nomSalle: string;
   };
@@ -31,6 +33,37 @@ interface Planning {
     email_representant: string;
     nomFiliere: string;
   };
+}
+
+interface Reservation {
+  idReservation: number;
+  type: 'reservation';
+  salle: {
+    nomSalle: string;
+  };
+  matiere: {
+    id: number;
+    nomMatiere: string;
+  };
+  horaire: {
+    idHoraire: number;
+    heure_debut: string;
+    heure_fin: string;
+    jour: string;
+  };
+  professeur: {
+    id_professeur: number;
+    email: string;
+    mot_de_passe: string;
+    nomProfesseur: string;
+    prenomProfesseur: string;
+  };
+  filiere: {
+    idFiliere: number;
+    email_representant: string;
+    nomFiliere: string;
+  };
+  reservationDate: string;
 }
 
 interface Major {
@@ -60,15 +93,18 @@ interface Classroom {
   templateUrl: './schedule-management.component.html',
   styleUrls: ['./schedule-management.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  providers: [DataService]
 })
 export class ScheduleManagementComponent implements OnInit {
   selectedMajor: Major | undefined;
   majors: Major[] = [];
   plannings: Planning[] = [];
+  reservations: Reservation[] = [];
   subjects: Subject[] = [];
   professors: Professor[] = [];
   classrooms: Classroom[] = [];
+  userRole: string = 'admin'; // Default to admin, you should get this from your auth service
   
   days: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   timeSlots: string[] = ['8:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
@@ -80,13 +116,16 @@ export class ScheduleManagementComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private dataService: DataService
   ) {
     this.scheduleItemForm = this.fb.group({
       subjectId: ['', Validators.required],
       professorId: ['', Validators.required],
       classroomId: ['', Validators.required]
     });
+    // Get user role from localStorage or your auth service
+    this.userRole = localStorage.getItem('userRole') || 'admin';
   }
 
   ngOnInit() {
@@ -134,41 +173,69 @@ export class ScheduleManagementComponent implements OnInit {
   loadSchedule() {
     if (this.selectedMajor) {
       console.log('Loading schedule for major:', this.selectedMajor);
-      const url = `/api/planning/recherche-par-filiere/${this.selectedMajor.id}`;
-      console.log('API URL:', url);
       
-      this.http.get<Planning[]>(url)
+      // Use the data service to get both plannings and reservations
+      this.dataService.getTimetableByMajor(this.selectedMajor.id)
         .subscribe({
-          next: (data) => {
-            console.log('Received planning data:', data);
-            this.plannings = data;
+          next: (data: any[]) => {
+            console.log('Received combined data:', data);
+            // Split the data into plannings and reservations
+            this.plannings = data.filter((item: any) => item.type === 'planning');
+            this.reservations = data.filter((item: any) => item.type === 'reservation');
+            console.log('Plannings:', this.plannings);
+            console.log('Reservations:', this.reservations);
           },
-          error: (error) => {
-            console.error('Error loading schedule:', error);
+          error: (error: any) => {
+            console.error('Error loading schedule data:', error);
           }
         });
     }
   }
 
-  getScheduleItem(dayIndex: number, timeIndex: number): Planning | undefined {
+  getScheduleItem(dayIndex: number, timeIndex: number): Planning | Reservation | undefined {
     // Convert day and time indices to horaire ID
     const horaireId = (dayIndex * 4) + timeIndex + 1;
-    console.log(`Looking for planning with horaireId ${horaireId} at day ${dayIndex}, time ${timeIndex}`);
+    
+    console.log('Getting schedule item for horaireId:', horaireId);
+    console.log('Current reservations:', this.reservations);
+    console.log('Current plannings:', this.plannings);
+    
+    // First check reservations (they take precedence)
+    const reservation = this.reservations.find(r => r.horaire.idHoraire === horaireId);
+    if (reservation) {
+      console.log('Found reservation:', reservation);
+      return reservation;
+    }
+    
+    // If no reservation, check plannings
     const planning = this.plannings.find(p => p.horaire.idHoraire === horaireId);
-    console.log('Found planning:', planning);
+    if (planning) {
+      console.log('Found planning:', planning);
+    }
     return planning;
   }
 
-  getSubjectName(planning: Planning): string {
-    return planning.matiere.nomMatiere;
+  isReservation(item: Planning | Reservation | undefined): boolean {
+    return item !== undefined && item.type === 'reservation';
   }
 
-  getProfessorName(planning: Planning): string {
-    return `${planning.professeur.prenomProfesseur} ${planning.professeur.nomProfesseur}`;
+  getSubjectName(item: Planning | Reservation): string {
+    return item.matiere.nomMatiere;
   }
 
-  getClassroomName(planning: Planning): string {
-    return planning.salle.nomSalle;
+  getProfessorName(item: Planning | Reservation): string {
+    return `${item.professeur.prenomProfesseur} ${item.professeur.nomProfesseur}`;
+  }
+
+  getClassroomName(item: Planning | Reservation): string {
+    return item.salle.nomSalle;
+  }
+
+  getReservationDate(item: Planning | Reservation): string | undefined {
+    if ('reservationDate' in item) {
+      return item.reservationDate;
+    }
+    return undefined;
   }
 
   openAddScheduleItemModal(dayIndex: number, timeIndex: number) {
@@ -186,35 +253,63 @@ export class ScheduleManagementComponent implements OnInit {
     if (this.scheduleItemForm.valid && this.selectedMajor) {
       const horaireId = (this.currentDay * 4) + this.currentTimeSlot + 1;
       
-      const planningData = {
+      const reservationData = {
         idMatiere: this.scheduleItemForm.value.subjectId,
         idHoraire: horaireId,
         idProfesseur: this.scheduleItemForm.value.professorId,
         idFiliere: this.selectedMajor.id,
-        salleId: this.scheduleItemForm.value.classroomId
+        salleId: this.scheduleItemForm.value.classroomId,
+        reservationDate: new Date().toISOString().split('T')[0] // Add current date
       };
 
-      console.log('Sending planning data:', planningData);
+      console.log('Sending reservation data:', reservationData);
 
-      this.http.post('/api/plannings', planningData)
+      this.http.post('http://localhost:8090/api/reservations', reservationData)
         .subscribe({
           next: (response) => {
-            console.log('Planning added successfully:', response);
+            console.log('Reservation added successfully:', response);
             this.closeScheduleItemModal();
             this.loadSchedule(); // Reload the schedule to show the new item
           },
           error: (error) => {
-            console.error('Error adding planning:', error);
+            console.error('Error adding reservation:', error);
           }
         });
     }
   }
 
-  deleteScheduleItem(id: number) {
-    // TODO: Implement API call to delete schedule item
+  deleteScheduleItem(item: Planning | Reservation) {
+    if ('reservationDate' in item) {
+      // It's a reservation
+      this.http.delete(`/api/reservations/${item.idReservation}`)
+        .subscribe({
+          next: () => {
+            this.loadSchedule(); // Reload the schedule
+          },
+          error: (error) => {
+            console.error('Error deleting reservation:', error);
+          }
+        });
+    } else {
+      // It's a planning
+      this.http.delete(`/api/plannings/${item.idPlanning}`)
+        .subscribe({
+          next: () => {
+            this.loadSchedule(); // Reload the schedule
+          },
+          error: (error) => {
+            console.error('Error deleting planning:', error);
+          }
+        });
+    }
   }
 
   findEmptyClassrooms() {
     // TODO: Implement logic to find empty classrooms
+  }
+
+  getScheduleItemClass(item: Planning | Reservation): string {
+    // Always show reservations in orange and plannings in blue
+    return item.type === 'reservation' ? 'schedule-item reservation-item' : 'schedule-item';
   }
 }

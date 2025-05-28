@@ -25,12 +25,13 @@
         <tr *ngFor="let timeSlot of timeSlots; let i = index">
           <td>{{ timeSlot }}</td>
           <td *ngFor="let day of days; let j = index" class="schedule-cell">
-            <ng-container *ngIf="getScheduleItem(j, i); let planning; else emptyCell">
-              <div class="schedule-item">
-                <p><strong>Subject:</strong> {{ getSubjectName(planning) }}</p>
-                <p><strong>Professor:</strong> {{ getProfessorName(planning) }}</p>
-                <p><strong>Classroom:</strong> {{ getClassroomName(planning) }}</p>
-                <button (click)="deleteScheduleItem(planning.idPlanning)" class="btn btn-sm btn-danger">
+            <ng-container *ngIf="getScheduleItem(j, i); let item; else emptyCell">
+              <div [ngClass]="getScheduleItemClass(item)">
+                <p><strong>Subject:</strong> {{ getSubjectName(item) }}</p>
+                <p><strong>Professor:</strong> {{ getProfessorName(item) }}</p>
+                <p><strong>Classroom:</strong> {{ getClassroomName(item) }}</p>
+                <p *ngIf="item.type === 'reservation'"><strong>Reserved for:</strong> {{ getReservationDate(item) | date }}</p>
+                <button (click)="deleteScheduleItem(item)" class="btn btn-sm btn-danger">
                   Remove
                 </button>
               </div>

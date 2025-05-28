@@ -37,18 +37,32 @@
   width: 150px;
   height: 100px;
   vertical-align: top;
+  padding: 4px !important;
 }
 
 .schedule-item {
-  background-color: #f8f9fa;
-  padding: 8px;
+  padding: 10px;
   border-radius: 4px;
-  margin: 2px;
+  background-color: #E3F2FD;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .schedule-item p {
   margin: 2px 0;
   font-size: 0.9em;
+}
+
+.schedule-item.reservation-item {
+  background-color: #FFF3E0 !important;
+  border: 1px solid #FFE0B2;
+}
+.reservation-item {
+  background-color: #FFF3E0 !important;
+  border: 1px solid #FFE0B2;
 }
 
 .add-btn {

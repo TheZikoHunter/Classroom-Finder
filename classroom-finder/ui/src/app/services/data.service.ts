@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Professor } from '../models/professor.model';
 import { Subject } from '../models/subject.model';
 import { Classroom } from '../models/classroom.model';
@@ -92,7 +93,24 @@ export class DataService {
 
   // Timetable operations
   getTimetableByMajor(majorId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/plannings/recherche-par-filiere/${majorId}`);
+    // Fetch both plannings and reservations
+    const plannings$ = this.http.get<any[]>(`${this.apiUrl}/plannings/recherche-par-filiere/${majorId}`);
+    const reservations$ = this.http.get<any[]>(`${this.apiUrl}/reservations/recherche-par-filiere/${majorId}`);
+
+    // Combine both observables and merge their results
+    return forkJoin({
+      plannings: plannings$,
+      reservations: reservations$
+    }).pipe(
+      map(({ plannings, reservations }) => {
+        // Add a type field to distinguish between plannings and reservations
+        const typedPlannings = plannings.map(p => ({ ...p, type: 'planning' }));
+        const typedReservations = reservations.map(r => ({ ...r, type: 'reservation' }));
+        
+        // Combine both arrays
+        return [...typedPlannings, ...typedReservations];
+      })
+    );
   }
 
   // Planning operations

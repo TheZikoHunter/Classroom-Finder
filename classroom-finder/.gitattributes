@@ -1,2 +1,3 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+classroom-finder\backend\src\main\resources\application.properties

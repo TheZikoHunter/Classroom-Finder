@@ -130,13 +130,13 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateReservation(@PathVariable Long id, @RequestBody Reservation reservation) {
+    public ResponseEntity<?> updateReservation(@PathVariable long id, @RequestBody Reservation reservation) {
         try {
             if (!reservationRepository.existsById(id)) {
                 return new ResponseEntity<>("Reservation with id " + id + " not found", HttpStatus.NOT_FOUND);
             }
 
-            reservation.setReservationId(id);
+            reservation.setIdReservation(id);
             validateNoConflicts(reservation);
             Reservation updatedReservation = reservationRepository.save(reservation);
             return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
@@ -192,8 +192,7 @@ public class ReservationController {
                 reservation.getProfesseur(), reservation.getHoraire(), reservation.getReservationDate());
 
         // Filter out the current reservation if it's an update
-        professorConflicts.removeIf(r -> r.getReservationId() != null && 
-            r.getReservationId().equals(reservation.getReservationId()));
+        professorConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
 
         if (!professorConflicts.isEmpty()) {
             throw new ReservationConflictException("Professor is already scheduled for this time slot and date");
@@ -204,8 +203,7 @@ public class ReservationController {
                 reservation.getSalle(), reservation.getHoraire(), reservation.getReservationDate());
 
         // Filter out the current reservation if it's an update
-        salleConflicts.removeIf(r -> r.getReservationId() != null && 
-            r.getReservationId().equals(reservation.getReservationId()));
+        salleConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
 
         if (!salleConflicts.isEmpty()) {
             throw new ReservationConflictException("Classroom is already booked for this time slot and date");
@@ -216,8 +214,7 @@ public class ReservationController {
                 reservation.getFiliere(), reservation.getHoraire(), reservation.getReservationDate());
 
         // Filter out the current reservation if it's an update
-        filiereConflicts.removeIf(r -> r.getReservationId() != null && 
-            r.getReservationId().equals(reservation.getReservationId()));
+        filiereConflicts.removeIf(r -> r.getIdReservation() == reservation.getIdReservation());
 
         if (!filiereConflicts.isEmpty()) {
             throw new ReservationConflictException("Major already has a class scheduled for this time slot and date");

@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reservationId;
+    private long idReservation;
 
     @ManyToOne
     @JoinColumn(name = "nomSalle", nullable = false)
@@ -54,12 +54,12 @@ public class Reservation {
     }
 
     // Getters and Setters
-    public Long getReservationId() {
-        return reservationId;
+    public long getIdReservation() {
+        return idReservation;
     }
 
-    public void setReservationId(Long reservationId) {
-        this.reservationId = reservationId;
+    public void setIdReservation(long idReservation) {
+        this.idReservation = idReservation;
     }
 
     public Salle getSalle() {
@@ -116,12 +116,12 @@ public class Reservation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Reservation that = (Reservation) o;
-        return Objects.equals(reservationId, that.reservationId);
+        return Objects.equals(idReservation, that.idReservation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reservationId);
+        return Objects.hash(idReservation);
     }
 
     // Method to check if this reservation conflicts with another reservation
@@ -150,7 +150,7 @@ public class Reservation {
     @Override
     public String toString() {
         return "Reservation{" +
-                "reservationId=" + reservationId +
+                "id=" + idReservation +
                 ", salle=" + salle +
                 ", matiere=" + matiere +
                 ", horaire=" + horaire +
