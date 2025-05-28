@@ -24,7 +24,7 @@ import { DataService, Planning } from '../../services/data.service';
             </option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" *ngIf="!hideProfessorSelect">
           <label>Professor:</label>
           <select [(ngModel)]="selectedProfessor" class="form-control">
             <option [ngValue]="null">Select Professor</option>
@@ -124,6 +124,7 @@ export class AssignmentDialogComponent implements OnInit {
   @Input() professors: Professor[] = [];
   @Input() classrooms: Classroom[] = [];
   @Input() selectedMajorId: number = 0;
+  @Input() hideProfessorSelect: boolean = false;
   
   @Output() save = new EventEmitter<TimeSlot>();
   @Output() cancel = new EventEmitter<void>();
@@ -143,7 +144,9 @@ export class AssignmentDialogComponent implements OnInit {
   }
 
   isValid(): boolean {
-    return !!(this.selectedSubject && this.selectedProfessor && this.selectedClassroom && this.selectedMajorId > 0);
+    return !!this.selectedSubject && 
+           (this.hideProfessorSelect || !!this.selectedProfessor) && 
+           !!this.selectedClassroom;
   }
 
   private getHoraireId(): number {
@@ -201,7 +204,7 @@ export class AssignmentDialogComponent implements OnInit {
       const planning: Planning = {
         idMatiere: this.selectedSubject!.id,
         idHoraire: horaireId,
-        idProfesseur: this.selectedProfessor!.id_professeur,
+        idProfesseur: this.hideProfessorSelect ? this.professors[0].id_professeur : this.selectedProfessor!.id_professeur,
         idFiliere: this.selectedMajorId,
         salleId: this.selectedClassroom!.nomSalle
       };
@@ -213,7 +216,7 @@ export class AssignmentDialogComponent implements OnInit {
             startTime: this.timeSlot.startTime,
             endTime: this.timeSlot.endTime,
             subject: this.selectedSubject,
-            professor: this.selectedProfessor,
+            professor: this.hideProfessorSelect ? this.professors[0] : this.selectedProfessor,
             classroom: this.selectedClassroom
           };
           this.save.emit(updatedSlot);

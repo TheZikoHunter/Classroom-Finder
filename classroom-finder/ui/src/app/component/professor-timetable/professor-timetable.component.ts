@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -7,6 +6,7 @@ import { TimeSlot } from '../../models/time-slot.model';
 import { AuthService } from '../../auth/auth.service';
 import { DataService } from '../../services/data.service';
 import { environment } from '../../../environments/environment';
+import { AssignmentDialogComponent } from '../assignment-dialog/assignment-dialog.component';
 
 interface Planning {
   idPlanning: number;
@@ -55,224 +55,345 @@ interface Classroom {
 
 @Component({
   selector: 'app-professor-timetable',
-  templateUrl: './professor-timetable.component.html',
-  styleUrls: ['./professor-timetable.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule]
+  imports: [CommonModule, FormsModule, AssignmentDialogComponent],
+  template: `
+    <div class="dashboard-layout">
+      <main class="main-content">
+        <div class="timetable-panel">
+          <div class="header">
+            <h1>Professor Timetable</h1>
+            <div class="controls">
+              <select class="major-select" (change)="onMajorChange($event)">
+                <option value="">Select Major</option>
+                <option *ngFor="let major of majors" [value]="major.idFiliere">{{major.nomFiliere}}</option>
+              </select>
+              <button class="logout-btn" (click)="logout()">Logout</button>
+            </div>
+          </div>
+
+          <div class="timetable">
+            <table class="timetable-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th *ngFor="let day of days">{{day}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let range of timeRanges">
+                  <td class="time-cell">{{range.start}} - {{range.end}}</td>
+                  <td *ngFor="let day of days" class="slot-cell" (click)="assignTimeSlot(getTimeSlot(day, range))">
+                    <ng-container *ngIf="getTimeSlot(day, range) as slot">
+                      <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
+                        <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
+                        <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
+                      </div>
+                    </ng-container>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <app-assignment-dialog
+            *ngIf="showAssignmentDialog && selectedTimeSlot"
+            [timeSlot]="selectedTimeSlot"
+            [subjects]="subjects"
+            [professors]="[currentProfessor]"
+            [classrooms]="classrooms"
+            [selectedMajorId]="selectedMajorId"
+            [hideProfessorSelect]="true"
+            (save)="onAssignmentSave($event)"
+            (cancel)="onAssignmentCancel()">
+          </app-assignment-dialog>
+        </div>
+      </main>
+    </div>
+  `,
+  styles: [`
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .major-select {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      min-width: 200px;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .timetable {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .timetable-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    .timetable-table th,
+    .timetable-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .timetable-table th {
+      background-color: #f5f5f5;
+      font-weight: 500;
+    }
+
+    .time-cell {
+      background-color: #f9f9f9;
+      font-weight: 500;
+      min-width: 100px;
+      max-width: 100px;
+    }
+
+    .slot-cell {
+      min-width: 150px;
+      max-width: 150px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .slot-cell:hover {
+      background-color: #f5f5f5;
+    }
+
+    .slot-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.9em;
+    }
+
+    .slot-content .subject {
+      font-weight: 500;
+      color: #2196F3;
+    }
+
+    .slot-content .classroom {
+      color: #888;
+      font-size: 0.85em;
+    }
+  `]
 })
 export class ProfessorTimetableComponent implements OnInit {
-  selectedMajor: Major | undefined;
   majors: Major[] = [];
-  plannings: Planning[] = [];
   subjects: Subject[] = [];
   classrooms: Classroom[] = [];
-  currentProfessorId: number = 1; // This should be set from the auth service
+  currentProfessor: any;
+  timeSlots: TimeSlot[] = [];
+  showAssignmentDialog = false;
+  selectedTimeSlot: TimeSlot | null = null;
+  selectedMajorId: number = 0;
   
-  days: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  timeSlots: string[] = ['8:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
-  
-  showScheduleItemModal = false;
-  currentDay = 0;
-  currentTimeSlot = 0;
-  scheduleItemForm: FormGroup;
+  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  timeRanges = [
+    { start: '08:30', end: '10:30' },
+    { start: '10:30', end: '12:30' },
+    { start: '14:00', end: '16:00' },
+    { start: '16:00', end: '18:00' }
+  ];
 
   constructor(
-    private fb: FormBuilder,
     private http: HttpClient,
     private authService: AuthService,
     private dataService: DataService
-  ) {
-    this.scheduleItemForm = this.fb.group({
-      subjectId: ['', Validators.required],
-      classroomId: ['', Validators.required]
-    });
-  }
+  ) {}
 
   ngOnInit() {
-    this.loadMajors();
-    this.loadSubjects();
-    this.loadClassrooms();
-    // Get current professor ID from auth service
+    this.loadData();
+    this.initializeTimeSlots();
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
-      this.currentProfessorId = currentUser.id;
-    }
-  }
-
-  loadMajors() {
-    console.log('Loading majors from:', `${environment.apiUrl}/api/filieres`);
-    this.http.get<Major[]>(`${environment.apiUrl}/api/filieres`)
-      .subscribe({
-        next: (data) => {
-          console.log('Raw majors data:', data);
-          if (Array.isArray(data)) {
-            this.majors = data;
-            console.log('Processed majors:', this.majors);
-          } else {
-            console.error('Received non-array data for majors:', data);
-            this.majors = [];
-          }
-        },
-        error: (error) => {
-          console.error('Error loading majors:', error);
-          console.error('Error details:', {
-            status: error.status,
-            statusText: error.statusText,
-            message: error.message,
-            error: error.error
-          });
-          this.majors = [];
-        }
-      });
-  }
-
-  loadSubjects() {
-    this.http.get<Subject[]>(`${environment.apiUrl}/api/matieres`)
-      .subscribe({
-        next: (data) => {
-          console.log('Subjects loaded:', data);
-          this.subjects = data;
-        },
-        error: (error) => {
-          console.error('Error loading subjects:', error);
-          // Fallback to empty array if API fails
-          this.subjects = [];
-        }
-      });
-  }
-
-  loadClassrooms() {
-    this.http.get<Classroom[]>(`${environment.apiUrl}/api/salles`)
-      .subscribe({
-        next: (data) => {
-          console.log('Classrooms loaded:', data);
-          this.classrooms = data;
-        },
-        error: (error) => {
-          console.error('Error loading classrooms:', error);
-          // Fallback to empty array if API fails
-          this.classrooms = [];
-        }
-      });
-  }
-
-  loadSchedule() {
-    if (this.selectedMajor) {
-      console.log('Loading schedule for major:', this.selectedMajor);
-      const url = `${environment.apiUrl}/api/plannings/recherche-par-filiere/${this.selectedMajor.idFiliere}`;
-      console.log('API URL:', url);
-      
-      this.http.get<Planning[]>(url)
-        .subscribe({
-          next: (data) => {
-            console.log('Received planning data:', data);
-            // Show all plannings for the selected major
-            this.plannings = data;
-            console.log('All plannings:', this.plannings);
-          },
-          error: (error) => {
-            console.error('Error loading schedule:', error);
-            // Fallback to empty array if API fails
-            this.plannings = [];
-          }
-        });
-    }
-  }
-
-  getScheduleItem(dayIndex: number, timeIndex: number): Planning | undefined {
-    // Map day and time slot to idHoraire
-    // idHoraire mapping:
-    // 1-4: Monday (8-10, 10-12, 14-16, 16-18)
-    // 5-8: Tuesday
-    // 9-12: Wednesday
-    // 13-16: Thursday
-    // 17-20: Friday
-    const idHoraire = (dayIndex * 4) + timeIndex + 1;
-    
-    console.log('Looking for planning:', {
-      dayIndex,
-      timeIndex,
-      idHoraire,
-      plannings: this.plannings
-    });
-
-    return this.plannings.find(p => {
-      console.log('Comparing planning:', {
-        planningIdHoraire: p.horaire.idHoraire,
-        targetIdHoraire: idHoraire,
-        matches: p.horaire.idHoraire === idHoraire
-      });
-      return p.horaire.idHoraire === idHoraire;
-    });
-  }
-
-  getSubjectName(planning: Planning): string {
-    return planning.matiere.nomMatiere;
-  }
-
-  getClassroomName(planning: Planning): string {
-    return planning.salle.nomSalle;
-  }
-
-  openAddScheduleItemModal(dayIndex: number, timeIndex: number) {
-    this.currentDay = dayIndex;
-    this.currentTimeSlot = timeIndex;
-    this.showScheduleItemModal = true;
-  }
-
-  closeScheduleItemModal() {
-    this.showScheduleItemModal = false;
-    this.scheduleItemForm.reset();
-  }
-
-  addScheduleItem() {
-    if (this.scheduleItemForm.valid && this.selectedMajor) {
-      const day = this.days[this.currentDay];
-      const [startTime, endTime] = this.timeSlots[this.currentTimeSlot].split('-');
-      
-      const planningData = {
-        idMatiere: this.scheduleItemForm.value.subjectId,
-        idHoraire: {
-          jour: day,
-          heure_debut: startTime,
-          heure_fin: endTime
-        },
-        idProfesseur: this.currentProfessorId,
-        idFiliere: this.selectedMajor.idFiliere,
-        salleId: this.scheduleItemForm.value.classroomId
+      this.currentProfessor = {
+        id_professeur: currentUser.id,
+        nomProfesseur: currentUser.email.split('@')[0],
+        prenomProfesseur: ''
       };
-
-      console.log('Sending planning data:', planningData);
-
-      this.http.post(`${environment.apiUrl}/api/plannings`, planningData)
-        .subscribe({
-          next: (response) => {
-            console.log('Planning added successfully:', response);
-            this.closeScheduleItemModal();
-            this.loadSchedule(); // Reload the schedule to show the new item
-          },
-          error: (error) => {
-            console.error('Error adding planning:', error);
-          }
-        });
     }
   }
 
-  deleteScheduleItem(id: number) {
-    this.http.delete(`${environment.apiUrl}/api/plannings/${id}`)
-      .subscribe({
-        next: () => {
-          console.log('Planning deleted successfully');
-          this.loadSchedule(); // Reload the schedule after deletion
-        },
-        error: (error) => {
-          console.error('Error deleting planning:', error);
-        }
-      });
+  loadData(): void {
+    this.dataService.getClassrooms().subscribe(data => {
+      this.classrooms = data;
+    });
+
+    this.dataService.getMajors().subscribe(data => {
+      this.majors = data;
+    });
+
+    this.dataService.getSubjects().subscribe(data => {
+      this.subjects = data;
+    });
   }
 
-  findEmptyClassrooms() {
-    // TODO: Implement logic to find empty classrooms
-    console.log('Finding empty classrooms...');
+  initializeTimeSlots(): void {
+    this.timeSlots = this.timeRanges.map(range => ({
+      day: this.days[0],
+      startTime: range.start,
+      endTime: range.end,
+      subject: null,
+      professor: this.currentProfessor,
+      classroom: null
+    }));
+  }
+
+  getTimeSlot(day: string, range: { start: string; end: string }): TimeSlot | null {
+    return this.timeSlots.find(slot => 
+      slot.day.toLowerCase() === day.toLowerCase() && 
+      slot.startTime === range.start && 
+      slot.endTime === range.end
+    ) || null;
+  }
+
+  onMajorChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const majorId = parseInt(select.value);
+    this.selectedMajorId = majorId;
+    if (majorId) {
+      this.dataService.getTimetableByMajor(majorId).subscribe(
+        (data) => {
+          console.log('API Response:', data);
+          
+          this.timeSlots = [];
+          this.days.forEach(day => {
+            this.timeRanges.forEach(range => {
+              this.timeSlots.push({
+                day,
+                startTime: range.start,
+                endTime: range.end,
+                subject: null,
+                professor: this.currentProfessor,
+                classroom: null
+              });
+            });
+          });
+
+          if (Array.isArray(data)) {
+            data.forEach(planning => {
+              if (planning && planning.horaire) {
+                const idHoraire = planning.horaire.idHoraire;
+                const dayIndex = Math.floor((idHoraire - 1) / 4);
+                const timeSlotIndex = (idHoraire - 1) % 4;
+                
+                if (dayIndex >= 0 && dayIndex < this.days.length && 
+                    timeSlotIndex >= 0 && timeSlotIndex < this.timeRanges.length) {
+                  const timeSlot = this.timeSlots.find(slot => 
+                    slot.day === this.days[dayIndex] &&
+                    slot.startTime === this.timeRanges[timeSlotIndex].start &&
+                    slot.endTime === this.timeRanges[timeSlotIndex].end
+                  );
+
+                  if (timeSlot) {
+                    timeSlot.subject = planning.matiere;
+                    timeSlot.classroom = planning.salle;
+                  }
+                }
+              }
+            });
+          }
+        },
+        (error) => {
+          console.error('Error fetching timetable:', error);
+        }
+      );
+    } else {
+      this.timeSlots = [];
+      this.days.forEach(day => {
+        this.timeRanges.forEach(range => {
+          this.timeSlots.push({
+            day,
+            startTime: range.start,
+            endTime: range.end,
+            subject: null,
+            professor: this.currentProfessor,
+            classroom: null
+          });
+        });
+      });
+    }
+  }
+
+  assignTimeSlot(slot: TimeSlot | null): void {
+    if (slot) {
+      if (slot.professor && slot.professor.id_professeur !== this.currentProfessor.id_professeur) {
+        alert('This time slot is already assigned to another professor');
+        return;
+      }
+      this.selectedTimeSlot = slot;
+      this.showAssignmentDialog = true;
+    }
+  }
+
+  onAssignmentSave(updatedSlot: TimeSlot): void {
+    const index = this.timeSlots.findIndex(slot => 
+      slot.day === updatedSlot.day && 
+      slot.startTime === updatedSlot.startTime && 
+      slot.endTime === updatedSlot.endTime
+    );
+    
+    if (index !== -1) {
+      this.timeSlots[index] = {
+        ...updatedSlot,
+        professor: this.currentProfessor
+      };
+    }
+    
+    this.showAssignmentDialog = false;
+    this.selectedTimeSlot = null;
+    this.loadData();
+  }
+
+  onAssignmentCancel(): void {
+    this.showAssignmentDialog = false;
+    this.selectedTimeSlot = null;
+    this.loadData();
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 } 
