@@ -83,10 +83,13 @@ interface Classroom {
               <tbody>
                 <tr *ngFor="let range of timeRanges">
                   <td class="time-cell">{{range.start}} - {{range.end}}</td>
-                  <td *ngFor="let day of days" class="slot-cell" (click)="assignTimeSlot(getTimeSlot(day, range))">
+                  <td *ngFor="let day of days" class="slot-cell" 
+                      [class.my-slot]="getTimeSlot(day, range)?.professor?.id_professeur === currentProfessor?.id_professeur"
+                      (click)="assignTimeSlot(getTimeSlot(day, range))">
                     <ng-container *ngIf="getTimeSlot(day, range) as slot">
                       <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
                         <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
+                        <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
                         <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
                       </div>
                     </ng-container>
@@ -195,10 +198,20 @@ interface Classroom {
       max-width: 150px;
       cursor: pointer;
       transition: background-color 0.2s;
+      border: 2px solid transparent;
     }
 
     .slot-cell:hover {
       background-color: #f5f5f5;
+    }
+
+    .slot-cell.my-slot {
+      background-color: #e3f2fd;
+      border-color: #2196F3;
+    }
+
+    .slot-cell.my-slot:hover {
+      background-color: #bbdefb;
     }
 
     .slot-content {
@@ -211,6 +224,10 @@ interface Classroom {
     .slot-content .subject {
       font-weight: 500;
       color: #2196F3;
+    }
+
+    .slot-content .professor {
+      color: #666;
     }
 
     .slot-content .classroom {
@@ -229,7 +246,7 @@ export class ProfessorTimetableComponent implements OnInit {
   selectedTimeSlot: TimeSlot | null = null;
   selectedMajorId: number = 0;
   
-  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   timeRanges = [
     { start: '08:30', end: '10:30' },
     { start: '10:30', end: '12:30' },
@@ -306,7 +323,7 @@ export class ProfessorTimetableComponent implements OnInit {
                 startTime: range.start,
                 endTime: range.end,
                 subject: null,
-                professor: this.currentProfessor,
+                professor: null,
                 classroom: null
               });
             });
@@ -329,6 +346,7 @@ export class ProfessorTimetableComponent implements OnInit {
 
                   if (timeSlot) {
                     timeSlot.subject = planning.matiere;
+                    timeSlot.professor = planning.professeur;
                     timeSlot.classroom = planning.salle;
                   }
                 }
@@ -349,7 +367,7 @@ export class ProfessorTimetableComponent implements OnInit {
             startTime: range.start,
             endTime: range.end,
             subject: null,
-            professor: this.currentProfessor,
+            professor: null,
             classroom: null
           });
         });

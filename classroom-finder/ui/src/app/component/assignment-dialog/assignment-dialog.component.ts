@@ -189,6 +189,13 @@ export class AssignmentDialogComponent implements OnInit {
       if (startTime === '14:00' && endTime === '16:00') return 19;
       if (startTime === '16:00' && endTime === '18:00') return 20;
     }
+    // Saturday
+    if (day === 'saturday') {
+      if (startTime === '08:30' && endTime === '10:30') return 21;
+      if (startTime === '10:30' && endTime === '12:30') return 22;
+      if (startTime === '14:00' && endTime === '16:00') return 23;
+      if (startTime === '16:00' && endTime === '18:00') return 24;
+    }
 
     return 0; // Invalid time slot
   }
