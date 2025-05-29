@@ -56,14 +56,13 @@ import { AuthService } from '../../auth/auth.service';
                 [class.is-invalid]="passwordInput.invalid && passwordInput.touched"
                 placeholder="Enter your password"
               >
-              <button 
-                type="button"
-                class="password-toggle"
+              <i 
+                class="fas" 
+                [class.fa-eye]="!showPassword" 
+                [class.fa-eye-slash]="showPassword"
                 (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-              >
-                <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
-              </button>
+                class="password-toggle"
+              ></i>
             </div>
             <div class="invalid-feedback" *ngIf="passwordInput.invalid && passwordInput.touched">
               Password is required
@@ -188,31 +187,25 @@ import { AuthService } from '../../auth/auth.service';
 
     .input-wrapper {
       position: relative;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     .input-icon {
       position: absolute;
-      left: 0.75rem;
+      left: 1rem;
       top: 50%;
       transform: translateY(-50%);
       color: #666;
       font-size: 1rem;
-      pointer-events: none;
-      z-index: 1;
     }
 
     .form-control {
       width: 100%;
-      box-sizing: border-box;
-      padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+      padding: 0.875rem 1rem 0.875rem 2.5rem;
       border: 1.5px solid #e1e5eb;
       border-radius: 8px;
       font-size: 0.95rem;
       transition: all 0.2s ease;
       background: #f8fafc;
-      height: 42px;
     }
 
     .form-control:focus {
@@ -228,37 +221,16 @@ import { AuthService } from '../../auth/auth.service';
 
     .password-toggle {
       position: absolute;
-      right: 0.5rem;
+      right: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      background: none;
-      border: none;
-      padding: 0.25rem;
-      cursor: pointer;
       color: #666;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      cursor: pointer;
       transition: color 0.2s;
-      z-index: 1;
     }
 
     .password-toggle:hover {
       color: #2196F3;
-    }
-
-    .password-toggle i {
-      font-size: 1rem;
-    }
-
-    .password-toggle:focus {
-      outline: none;
-    }
-
-    .password-toggle:focus-visible {
-      outline: 2px solid #2196F3;
-      outline-offset: 2px;
-      border-radius: 4px;
     }
 
     .is-invalid {
