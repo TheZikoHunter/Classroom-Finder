@@ -202,68 +202,92 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
     }
 
     .timetable {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 20px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
       overflow-x: auto;
     }
 
     .timetable-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       min-width: 800px;
+      table-layout: fixed;
     }
 
     .timetable-table th,
     .timetable-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border: none;
+      padding: 1rem;
       text-align: left;
     }
 
     .timetable-table th {
-      background-color: #f5f5f5;
-      font-weight: 500;
+      background-color: #f1f5f9;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .time-cell {
-      background-color: #f9f9f9;
-      font-weight: 500;
-      min-width: 100px;
-      max-width: 100px;
+      background-color: #f1f5f9;
+      font-weight: 600;
+      min-width: 110px;
+      text-align: center;
+      border-right: 2px solid #e2e8f0;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .slot-cell {
+      position: relative;
       min-width: 150px;
-      max-width: 150px;
+      text-align: center;
+      vertical-align: middle;
+      border: 3px solid #333;
+      transition: background-color 0.2s, transform 0.2s, border-color 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
     .slot-cell:hover {
-      background-color: #f5f5f5;
+      background-color: rgba(0, 0, 0, 0.03);
+      transform: translateY(-1px);
     }
 
+    .slot-cell.my-slot, .slot-cell.planning-slot {
+      background-color: #e3f2fd;
+      border-color: #2196F3;
+    }
+    .slot-cell.temporary, .slot-cell.reservation-slot {
+      background-color: #fff3e0;
+      border-color: #ff9800;
+    }
     .slot-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      font-size: 0.9em;
+      gap: 0.3rem;
+      font-size: 0.95rem;
     }
 
     .slot-content .subject {
-      font-weight: 500;
-      color: #2196F3;
+      font-weight: 600;
+      color: #2c3e50;
     }
 
     .slot-content .professor {
-      color: #666;
+      color: #555;
     }
 
     .slot-content .classroom {
       color: #888;
       font-size: 0.85em;
+    }
+    .reservation-date {
+      font-size: 0.8em;
+      color: #ff9800;
+      margin-top: 4px;
+      font-style: italic;
     }
   `]
 })

@@ -120,77 +120,78 @@ import { Reservation } from '../../models/reservation.model';
     }
 
     .timetable {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 20px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
       overflow-x: auto;
     }
 
     .timetable-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       min-width: 800px;
+      table-layout: fixed;
     }
 
     .timetable-table th,
     .timetable-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border: none;
+      padding: 1rem;
       text-align: left;
     }
 
     .timetable-table th {
-      background-color: #f5f5f5;
-      font-weight: 500;
+      background-color: #f1f5f9;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .time-cell {
-      background-color: #f9f9f9;
-      font-weight: 500;
-      min-width: 100px;
-      max-width: 100px;
+      background-color: #f1f5f9;
+      font-weight: 600;
+      min-width: 110px;
+      text-align: center;
+      border-right: 2px solid #e2e8f0;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .slot-cell {
+      position: relative;
       min-width: 150px;
-      max-width: 150px;
-      transition: background-color 0.2s;
-      border: 2px solid transparent;
+      text-align: center;
+      vertical-align: middle;
+      border: 5px solid #000;
+      transition: background-color 0.2s, transform 0.2s, border-color 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
 
     .slot-cell:hover {
-      background-color: #f5f5f5;
+      background-color: rgba(0, 0, 0, 0.03);
+      transform: translateY(-1px);
     }
 
-    .slot-cell.planning-slot {
+    .slot-cell.planning-slot, .slot-cell.my-slot {
       background-color: #e3f2fd;
       border-color: #2196F3;
     }
 
-    .slot-cell.planning-slot:hover {
-      background-color: #bbdefb;
-    }
-
-    .slot-cell.reservation-slot {
+    .slot-cell.reservation-slot, .slot-cell.temporary {
       background-color: #fff3e0;
       border-color: #ff9800;
-    }
-
-    .slot-cell.reservation-slot:hover {
-      background-color: #ffe0b2;
     }
 
     .slot-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      font-size: 0.9em;
+      gap: 0.3rem;
+      font-size: 0.95rem;
     }
 
     .slot-content .subject {
-      font-weight: 500;
-      color: #2196F3;
+      font-weight: 600;
+      color: #2c3e50;
     }
 
     .slot-content .classroom {
@@ -198,15 +199,8 @@ import { Reservation } from '../../models/reservation.model';
       font-size: 0.85em;
     }
 
-    .slot-content .major {
-      color: #666;
-      font-size: 0.85em;
-    }
-
     .slot-content .professor {
-      color: #666;
-      font-size: 0.85em;
-      font-style: italic;
+      color: #555;
     }
 
     .reservation-date {
@@ -218,93 +212,5 @@ import { Reservation } from '../../models/reservation.model';
   `]
 })
 export class MyScheduleComponent implements OnInit {
-  @Input() professorId!: number;
-  activeView: 'plannings' | 'reservations' = 'plannings';
-  planningSlots: Planning[] = [];
-  reservationSlots: Reservation[] = [];
-  
-  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  timeRanges = [
-    { start: '08:30', end: '10:30' },
-    { start: '10:30', end: '12:30' },
-    { start: '14:00', end: '16:00' },
-    { start: '16:00', end: '18:00' }
-  ];
-
-  constructor(private dataService: DataService) {}
-
-  ngOnInit() {
-    if (this.professorId) {
-      this.loadPlannings();
-      this.loadReservations();
-    }
-  }
-
-  private loadPlannings() {
-    this.dataService.getPlanningsByProfessor(this.professorId).subscribe({
-      next: (plannings: Planning[]) => {
-        this.planningSlots = plannings;
-      },
-      error: (error) => {
-        console.error('Error loading plannings:', error);
-      }
-    });
-  }
-
-  private loadReservations() {
-    this.dataService.getReservationsByProfessor(this.professorId).subscribe({
-      next: (reservations: Reservation[]) => {
-        this.reservationSlots = reservations;
-      },
-      error: (error) => {
-        console.error('Error loading reservations:', error);
-      }
-    });
-  }
-
-  getPlanningSlot(day: string, range: { start: string; end: string }): Planning | undefined {
-    return this.planningSlots.find(planning => 
-      planning.horaire.jour.toLowerCase() === day.toLowerCase() && 
-      planning.horaire.heure_debut === range.start && 
-      planning.horaire.heure_fin === range.end
-    );
-  }
-
-  getTimeSlot(day: string, range: { start: string; end: string }, type: 'planning' | 'reservation'): TimeSlot | undefined {
-    if (type === 'planning') {
-      const planning = this.getPlanningSlot(day, range);
-      if (planning) {
-        return {
-          day: planning.horaire.jour,
-          startTime: planning.horaire.heure_debut,
-          endTime: planning.horaire.heure_fin,
-          subject: planning.matiere,
-          classroom: planning.salle,
-          major: planning.filiere,
-          professor: planning.professeur,
-          type: 'planning'
-        };
-      }
-      return undefined;
-    }
-    const reservation = this.reservationSlots.find(res => 
-      res.horaire.jour.toLowerCase() === day.toLowerCase() && 
-      res.horaire.heure_debut === range.start && 
-      res.horaire.heure_fin === range.end
-    );
-    if (reservation) {
-      return {
-        day: reservation.horaire.jour,
-        startTime: reservation.horaire.heure_debut,
-        endTime: reservation.horaire.heure_fin,
-        subject: reservation.matiere,
-        classroom: reservation.salle,
-        major: reservation.filiere,
-        professor: reservation.professeur,
-        reservationDate: reservation.reservationDate,
-        type: 'reservation'
-      };
-    }
-    return undefined;
-  }
-} 
+  ngOnInit(): void {}
+}
