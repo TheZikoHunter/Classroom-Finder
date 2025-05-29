@@ -10,4 +10,5 @@ export interface TimeSlot {
   professor?: Professor | null;
   classroom?: Classroom | null;
   reservationDate?: string | null; // ISO date string for temporary reservations
+  type?: 'planning' | 'reservation' | null; // Type of the time slot: planning or reservation
 } 

@@ -84,8 +84,8 @@ interface Classroom {
                 <tr *ngFor="let range of timeRanges">
                   <td class="time-cell">{{range.start}} - {{range.end}}</td>
                   <td *ngFor="let day of days" class="slot-cell" 
-                      [class.my-slot]="getTimeSlot(day, range)?.professor?.id_professeur === currentProfessor?.id_professeur"
-                      [class.temporary]="getTimeSlot(day, range)?.reservationDate"
+                      [class.my-slot]="getTimeSlot(day, range)?.type === 'planning' && getTimeSlot(day, range)?.professor?.id_professeur === currentProfessor?.id_professeur"
+                      [class.temporary]="getTimeSlot(day, range)?.type === 'reservation'"
                       (click)="assignTimeSlot(getTimeSlot(day, range))">
                     <ng-container *ngIf="getTimeSlot(day, range) as slot">
                       <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
@@ -345,15 +345,16 @@ export class ProfessorTimetableComponent implements OnInit {
                 endTime: range.end,
                 subject: null,
                 professor: null,
-                classroom: null
+                classroom: null,
+                type: null
               });
             });
           });
 
           if (Array.isArray(data)) {
-            data.forEach(planning => {
-              if (planning && planning.horaire) {
-                const idHoraire = planning.horaire.idHoraire;
+            data.forEach(item => {
+              if (item && item.horaire) {
+                const idHoraire = item.horaire.idHoraire;
                 const dayIndex = Math.floor((idHoraire - 1) / 4);
                 const timeSlotIndex = (idHoraire - 1) % 4;
                 
@@ -366,9 +367,13 @@ export class ProfessorTimetableComponent implements OnInit {
                   );
 
                   if (timeSlot) {
-                    timeSlot.subject = planning.matiere;
-                    timeSlot.professor = planning.professeur;
-                    timeSlot.classroom = planning.salle;
+                    timeSlot.subject = item.matiere;
+                    timeSlot.professor = item.professeur;
+                    timeSlot.classroom = item.salle;
+                    timeSlot.type = item.type; // 'planning' or 'reservation'
+                    if (item.type === 'reservation') {
+                      timeSlot.reservationDate = item.reservationDate;
+                    }
                   }
                 }
               }
@@ -389,7 +394,8 @@ export class ProfessorTimetableComponent implements OnInit {
             endTime: range.end,
             subject: null,
             professor: null,
-            classroom: null
+            classroom: null,
+            type: null
           });
         });
       });
@@ -417,7 +423,8 @@ export class ProfessorTimetableComponent implements OnInit {
     if (index !== -1) {
       this.timeSlots[index] = {
         ...updatedSlot,
-        professor: this.currentProfessor
+        professor: this.currentProfessor,
+        type: 'reservation'
       };
     }
     
