@@ -59,95 +59,117 @@ import { AuthService } from '../../auth/auth.service';
     </div>
   `,
   styles: [`
+    /* Full-page container with a modern gradient background */
     .login-container {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #f0f4f8 0%,rgb(140, 170, 205) 100%);
-    }
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-color: #f5f5f5;
+      background: linear-gradient(135deg, #eef2f3 0%, #8caacd 100%);
+      font-family: 'Segoe UI', sans-serif;
     }
 
+    /* Login card with an entrance animation */
     .login-box {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
+    /* Heading styling */
     h1 {
       text-align: center;
-      color: #333;
-      margin-bottom: 2rem;
+      color: #2c3e50;
+      margin-bottom: 1.75rem;
+      font-size: 2.25rem;
+      letter-spacing: 0.5px;
     }
 
+    /* Spacing for the form groups */
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
+    /* Label styling */
     label {
       display: block;
       margin-bottom: 0.5rem;
-      color: #666;
+      font-weight: 600;
+      color: #34495e;
     }
 
+    /* Input fields with smooth transitions */
     .form-control {
       width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      padding: 0.85rem 1rem;
+      border: 1px solid #ccd1d9;
+      border-radius: 8px;
       font-size: 1rem;
+      transition: border 0.3s, box-shadow 0.3s;
     }
-
+    
     .form-control:focus {
       outline: none;
-      border-color: #2196F3;
-      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+      border-color: #2980b9;
+      box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
     }
 
+    /* Validation feedback styling */
     .is-invalid {
-      border-color: #dc3545;
+      border-color: #e74c3c;
     }
-
+    
     .invalid-feedback {
-      color: #dc3545;
+      color: #e74c3c;
       font-size: 0.875rem;
-      margin-top: 0.25rem;
+      margin-top: 0.3rem;
     }
-
+    
     .error-message {
-      color: #dc3545;
-      margin-bottom: 1rem;
+      color: #e74c3c;
+      margin-bottom: 1.5rem;
       text-align: center;
+      font-weight: 500;
     }
 
+    /* Login button styling with gradient and interactive feedback */
     .login-btn {
       width: 100%;
-      padding: 0.75rem;
-      background-color: #2196F3;
-      color: white;
+      padding: 0.85rem;
+      background: linear-gradient(45deg, #2980b9, #3498db);
+      color: #ffffff;
       border: none;
-      border-radius: 4px;
-      font-size: 1rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: background 0.3s, transform 0.2s;
     }
-
+    
     .login-btn:hover {
-      background-color: #1976D2;
+      background: linear-gradient(45deg, #2573a8, #2980b9);
+      transform: translateY(-2px);
     }
-
+    
     .login-btn:disabled {
-      background-color: #ccc;
+      background: #bdc3c7;
       cursor: not-allowed;
+    }
+    
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 480px) {
+      .login-box {
+        padding: 1.75rem;
+      }
     }
   `]
 })
@@ -155,7 +177,7 @@ export class LoginComponent {
   email: string = '';
   password: string = '';
   errorMessage: string = '';
-
+  
   constructor(
     private authService: AuthService,
     private router: Router
