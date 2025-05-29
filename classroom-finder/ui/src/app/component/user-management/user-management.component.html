@@ -48,12 +48,12 @@
         <div class="form-actions">
           <button type="button" class="btn-cancel" (click)="resetForm()">Cancel</button>
           <button type="submit" class="btn-save" [disabled]="professorForm.invalid">
-            {{isEditing ? 'Update' : 'Add'}} Professor
+            {{ isEditing ? 'Update' : 'Add' }} Professor
           </button>
         </div>
       </form>
     </div>
-
+    
     <!-- Professors List -->
     <div class="professors-list">
       <table>
@@ -67,9 +67,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let professor of professors">
-            <td>{{professor.nomProfesseur}}</td>
-            <td>{{professor.prenomProfesseur}}</td>
-            <td>{{professor.email}}</td>
+            <td>{{ professor.nomProfesseur }}</td>
+            <td>{{ professor.prenomProfesseur }}</td>
+            <td>{{ professor.email }}</td>
             <td>
               <button class="btn-edit" (click)="editProfessor(professor)">Edit</button>
               <button class="btn-delete" (click)="deleteProfessor(professor.id_professeur)">Delete</button>
@@ -79,4 +79,174 @@
       </table>
     </div>
   </div>
-</div> 
+</div>
+
+<style>
+  /* Container & Section */
+.user-management-container {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.section {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+/* Alerts */
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+/* Form Container */
+.form-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border 0.2s;
+}
+
+.form-control:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.error-message {
+  margin-top: 0.5rem;
+  color: #e74c3c;
+  font-size: 0.85rem;
+}
+
+/* Form Actions / Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-cancel {
+  background-color: #bdc3c7;
+  color: #fff;
+}
+
+.btn-cancel:hover {
+  background-color: #95a5a6;
+}
+
+.btn-save {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.btn-save:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+/* Professors List Table */
+.professors-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.professors-list th,
+.professors-list td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.professors-list thead {
+  background-color: #f0f3f4;
+}
+
+.professors-list tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Action Buttons in Table */
+.btn-edit,
+.btn-delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.3s;
+}
+
+.btn-edit {
+  background-color: #f39c12;
+  color: #fff;
+  margin-right: 0.5rem;
+}
+
+.btn-edit:hover {
+  background-color: #e67e22;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+</style>
