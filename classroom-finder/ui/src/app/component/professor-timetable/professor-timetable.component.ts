@@ -408,9 +408,64 @@ export class ProfessorTimetableComponent implements OnInit {
         alert('This time slot is already assigned to another professor');
         return;
       }
-      this.selectedTimeSlot = slot;
+      // Get the horaire ID for the selected time slot
+      const horaireId = this.getHoraireId(slot.day, slot.startTime, slot.endTime);
+      if (!horaireId) {
+        alert('Invalid time slot');
+        return;
+      }
+      this.selectedTimeSlot = { ...slot, horaireId };
       this.showAssignmentDialog = true;
     }
+  }
+
+  private getHoraireId(day: string, startTime: string, endTime: string): number {
+    const dayLower = day.toLowerCase();
+    
+    // Monday
+    if (dayLower === 'monday') {
+      if (startTime === '08:30' && endTime === '10:30') return 1;
+      if (startTime === '10:30' && endTime === '12:30') return 2;
+      if (startTime === '14:00' && endTime === '16:00') return 3;
+      if (startTime === '16:00' && endTime === '18:00') return 4;
+    }
+    // Tuesday
+    if (dayLower === 'tuesday') {
+      if (startTime === '08:30' && endTime === '10:30') return 5;
+      if (startTime === '10:30' && endTime === '12:30') return 6;
+      if (startTime === '14:00' && endTime === '16:00') return 7;
+      if (startTime === '16:00' && endTime === '18:00') return 8;
+    }
+    // Wednesday
+    if (dayLower === 'wednesday') {
+      if (startTime === '08:30' && endTime === '10:30') return 9;
+      if (startTime === '10:30' && endTime === '12:30') return 10;
+      if (startTime === '14:00' && endTime === '16:00') return 11;
+      if (startTime === '16:00' && endTime === '18:00') return 12;
+    }
+    // Thursday
+    if (dayLower === 'thursday') {
+      if (startTime === '08:30' && endTime === '10:30') return 13;
+      if (startTime === '10:30' && endTime === '12:30') return 14;
+      if (startTime === '14:00' && endTime === '16:00') return 15;
+      if (startTime === '16:00' && endTime === '18:00') return 16;
+    }
+    // Friday
+    if (dayLower === 'friday') {
+      if (startTime === '08:30' && endTime === '10:30') return 17;
+      if (startTime === '10:30' && endTime === '12:30') return 18;
+      if (startTime === '14:00' && endTime === '16:00') return 19;
+      if (startTime === '16:00' && endTime === '18:00') return 20;
+    }
+    // Saturday
+    if (dayLower === 'saturday') {
+      if (startTime === '08:30' && endTime === '10:30') return 21;
+      if (startTime === '10:30' && endTime === '12:30') return 22;
+      if (startTime === '14:00' && endTime === '16:00') return 23;
+      if (startTime === '16:00' && endTime === '18:00') return 24;
+    }
+
+    return 0;
   }
 
   onAssignmentSave(updatedSlot: TimeSlot): void {

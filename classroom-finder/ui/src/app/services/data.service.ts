@@ -113,6 +113,11 @@ export class DataService {
     );
   }
 
+  // Get available classrooms for a specific time slot
+  getAvailableClassrooms(horaireId: number): Observable<Classroom[]> {
+    return this.http.get<Classroom[]>(`${this.apiUrl}/plannings/available-classrooms/${horaireId}`);
+  }
+
   // Planning operations
   createPlanning(planning: Planning): Observable<Planning> {
     return this.http.post<Planning>(`${this.apiUrl}/plannings`, planning);

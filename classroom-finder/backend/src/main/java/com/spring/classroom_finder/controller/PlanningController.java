@@ -1,6 +1,7 @@
 package com.spring.classroom_finder.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -362,6 +363,55 @@ public class PlanningController {
     public static class ReservationConflictException extends Exception {
         public ReservationConflictException(String message) {
             super(message);
+        }
+    }
+
+    /**
+     * Get all available classrooms for a specific time slot (horaire)
+     * A classroom is considered available if it's not used in any planning or reservation for the given horaire
+     *
+     * @param horaireId The ID of the horaire (time slot)
+     * @return A list of available Salle objects
+     */
+    @GetMapping("/available-classrooms/{horaireId}")
+    public ResponseEntity<?> getAvailableClassrooms(@PathVariable Integer horaireId) {
+        try {
+            // First, verify that the horaire exists
+            Optional<Horaire> horaireOpt = horaireRepository.findById(horaireId);
+            if (horaireOpt.isEmpty()) {
+                return new ResponseEntity<>("Time slot not found", HttpStatus.NOT_FOUND);
+            }
+            Horaire horaire = horaireOpt.get();
+
+            // Get all classrooms
+            List<Salle> allClassrooms = salleRepository.findAll();
+
+            // Get classrooms that are used in plannings for this horaire
+            List<Planning> plannings = planningRepository.findByHoraire(horaire);
+            List<String> occupiedClassroomIds = plannings.stream()
+                .map(planning -> planning.getSalle().getNomSalle())
+                .toList();
+
+            // Get classrooms that are used in reservations for this horaire and today's date
+            List<Reservation> reservations = reservationRepository.findByHoraireAndReservationDate(
+                horaire, LocalDate.now());
+            List<String> reservedClassroomIds = reservations.stream()
+                .map(reservation -> reservation.getSalle().getNomSalle())
+                .toList();
+
+            // Combine both lists of occupied classroom IDs
+            List<String> allOccupiedClassroomIds = new ArrayList<>(occupiedClassroomIds);
+            allOccupiedClassroomIds.addAll(reservedClassroomIds);
+
+            // Filter out occupied classrooms
+            List<Salle> availableClassrooms = allClassrooms.stream()
+                .filter(classroom -> !allOccupiedClassroomIds.contains(classroom.getNomSalle()))
+                .toList();
+
+            return new ResponseEntity<>(availableClassrooms, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error getting available classrooms: " + e.getMessage(), 
+                HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

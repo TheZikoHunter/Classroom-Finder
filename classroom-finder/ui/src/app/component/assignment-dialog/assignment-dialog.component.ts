@@ -35,12 +35,15 @@ import { DataService, Planning } from '../../services/data.service';
         </div>
         <div class="form-group">
           <label>Classroom:</label>
-          <select [(ngModel)]="selectedClassroom" class="form-control">
+          <select [(ngModel)]="selectedClassroom" class="form-control" [disabled]="!availableClassrooms.length">
             <option [ngValue]="null">Select Classroom</option>
-            <option *ngFor="let classroom of classrooms" [ngValue]="classroom">
+            <option *ngFor="let classroom of availableClassrooms" [ngValue]="classroom">
               {{classroom.nomSalle}}
             </option>
           </select>
+          <small *ngIf="!availableClassrooms.length" class="help-text text-warning">
+            No classrooms available for this time slot
+          </small>
         </div>
         <div class="form-group" *ngIf="showReservationDate">
           <label>Reservation Date (Optional):</label>
@@ -127,6 +130,10 @@ import { DataService, Planning } from '../../services/data.service';
       font-size: 0.8em;
       margin-top: 4px;
     }
+
+    .text-warning {
+      color: #f44336;
+    }
   `]
 })
 export class AssignmentDialogComponent implements OnInit {
@@ -146,9 +153,9 @@ export class AssignmentDialogComponent implements OnInit {
   selectedClassroom: Classroom | null = null;
   reservationDate: string | null = null;
   minDate: string;
+  availableClassrooms: Classroom[] = [];
 
   constructor(private dataService: DataService) {
-    // Set minimum date to today
     const today = new Date();
     this.minDate = today.toISOString().split('T')[0];
   }
@@ -159,6 +166,24 @@ export class AssignmentDialogComponent implements OnInit {
       this.selectedProfessor = this.timeSlot.professor || null;
       this.selectedClassroom = this.timeSlot.classroom || null;
       this.reservationDate = this.timeSlot.reservationDate || null;
+      
+      // Get the horaire ID and fetch available classrooms
+      const horaireId = this.getHoraireId();
+      if (horaireId) {
+        this.dataService.getAvailableClassrooms(horaireId).subscribe({
+          next: (classrooms) => {
+            this.availableClassrooms = classrooms;
+            // If the current classroom is not in available classrooms, reset it
+            if (this.selectedClassroom && !this.availableClassrooms.some(c => c.nomSalle === this.selectedClassroom?.nomSalle)) {
+              this.selectedClassroom = null;
+            }
+          },
+          error: (error) => {
+            console.error('Error fetching available classrooms:', error);
+            this.availableClassrooms = [];
+          }
+        });
+      }
     }
   }
 

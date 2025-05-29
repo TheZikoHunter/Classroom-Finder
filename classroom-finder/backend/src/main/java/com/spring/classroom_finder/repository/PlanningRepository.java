@@ -32,6 +32,9 @@ public interface PlanningRepository extends JpaRepository<Planning, Long> {
     // Find all plannings by filiere and time slot
     List<Planning> findByFiliereAndHoraire(Filiere filiere, Horaire horaire);
 
+    // Find all plannings by time slot
+    List<Planning> findByHoraire(Horaire horaire);
+
     // Custom query to find all distinct filieres (majors) that a professor teaches
     @Query("SELECT DISTINCT p.filiere FROM Planning p WHERE p.professeur = :professeur")
     Set<Filiere> findAllFilieresByProfesseur(@Param("professeur") Professeur professeur);
