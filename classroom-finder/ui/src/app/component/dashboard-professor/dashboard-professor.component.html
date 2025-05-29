@@ -1,0 +1,50 @@
+<div class="dashboard-layout">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h2 class="text-white">Classroom Finder</h2>
+    </div>
+    
+    <ul class="nav-links">
+      <li [class.active]="activePanel === 'timetable'" (click)="setActivePanel('timetable')">
+        <i class="fas fa-calendar-alt"></i>
+        Timetable Management
+      </li>
+      <li [class.active]="activePanel === 'schedule'" (click)="setActivePanel('schedule')">
+        <i class="fas fa-clock"></i>
+        My Schedule
+      </li>
+    </ul>
+    
+    <div class="user-info">
+      <div class="user-profile">
+        <div class="avatar">
+          {{currentProfessor?.nomProfesseur?.charAt(0)}}{{currentProfessor?.prenomProfesseur?.charAt(0)}}
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{currentProfessor?.nomProfesseur}} {{currentProfessor?.prenomProfesseur}}</span>
+          <span class="user-role">Professor</span>
+        </div>
+      </div>
+      <button class="btn btn-danger w-100" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="content-header">
+      <h1>{{activePanel === 'timetable' ? 'Timetable Management' : 'My Schedule'}}</h1>
+    </div>
+
+    <div class="content-body">
+      <div *ngIf="activePanel === 'timetable'" class="timetable-panel">
+        <app-professor-timetable></app-professor-timetable>
+      </div>
+
+      <div *ngIf="activePanel === 'schedule'" class="schedule-panel">
+        <app-my-schedule></app-my-schedule>
+      </div>
+    </div>
+  </main>
+</div> 

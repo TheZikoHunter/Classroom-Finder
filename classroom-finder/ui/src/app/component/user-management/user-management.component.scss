@@ -1,0 +1,258 @@
+.user-management {
+  padding: var(--spacing-lg);
+}
+
+.page-header {
+  h1 {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+  }
+  
+  p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+}
+
+.form-card {
+  height: fit-content;
+  
+  .card-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+  }
+}
+
+.list-card {
+  .card-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-md);
+    
+    .card-title {
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.search-box {
+  position: relative;
+  width: 250px;
+  
+  i {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+  }
+  
+  input {
+    padding-left: calc(var(--spacing-md) * 2 + 1rem);
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    
+    &:focus {
+      background-color: var(--surface-color);
+    }
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  
+  .table {
+    margin: 0;
+    
+    th {
+      white-space: nowrap;
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-weight: 600;
+      color: var(--text-secondary);
+      background-color: var(--background-color);
+    }
+    
+    td {
+      padding: var(--spacing-md) var(--spacing-lg);
+      vertical-align: middle;
+    }
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  
+  .avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    
+    &.admin {
+      background-color: var(--danger-color);
+    }
+    
+    &.professor {
+      background-color: var(--primary-color);
+    }
+  }
+  
+  .user-name {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+}
+
+.badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.badge-admin {
+    background-color: var(--danger-color);
+    color: white;
+  }
+  
+  &.badge-professor {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  &.badge-user {
+    background-color: var(--secondary-color);
+    color: white;
+  }
+}
+
+.status-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  
+  &.active {
+    background-color: var(--success-color);
+    color: white;
+  }
+  
+  &.inactive {
+    background-color: var(--text-secondary);
+    color: white;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  
+  .btn-sm {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.875rem;
+    
+    i {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.password-input {
+  position: relative;
+  
+  .password-toggle {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  
+  .form-check-input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+  }
+  
+  .form-check-label {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+  }
+}
+
+.empty-state {
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  color: var(--text-secondary);
+  
+  .empty-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--border-color);
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .user-management {
+    padding: var(--spacing-md);
+  }
+  
+  .page-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start !important;
+    
+    .btn {
+      width: 100%;
+    }
+  }
+  
+  .search-box {
+    width: 100%;
+    margin-top: var(--spacing-md);
+  }
+  
+  .table-responsive {
+    margin: 0 calc(var(--spacing-md) * -1);
+    border-radius: 0;
+  }
+  
+  .table {
+    th, td {
+      white-space: nowrap;
+    }
+  }
+} 
