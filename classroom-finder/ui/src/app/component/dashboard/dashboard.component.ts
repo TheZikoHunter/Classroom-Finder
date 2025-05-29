@@ -82,7 +82,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
                         <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
                         <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
                         <button *ngIf="slot.type && (slot.idPlanning || slot.idReservation)" class="delete-btn" (click)="deleteSlot(slot); $event.stopPropagation()" title="Delete">
-                          🗑️
+                          <img src="assets/images/delete.png" alt="Delete" class="delete-icon" />
                         </button>
                       </div>
                     </ng-container>
@@ -299,9 +299,9 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
     }
     .delete-btn {
       position: absolute;
-      right: 6px;
-      bottom: 6px;
-      background: #e74c3c;
+      right: 0;
+      bottom: 0;
+      margin: 4px;
       color: #fff;
       border: none;
       border-radius: 50%;
@@ -318,6 +318,12 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
     }
     .delete-btn:hover {
       background: #c0392b;
+    }
+    .delete-icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+      pointer-events: none;
     }
   `]
 })
