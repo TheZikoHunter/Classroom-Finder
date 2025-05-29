@@ -13,7 +13,7 @@ import { AuthService } from '../../auth/auth.service';
       <div class="login-box">
         <div class="logo-container">
           <div class="logo-placeholder">
-            <i class="fas fa-graduation-cap"></i>
+            <img src="assets/images/logo.png" alt="INSEA Logo" class="logo-img" />
           </div>
           <h1>Classroom Finder</h1>
           <p class="subtitle">Welcome back! Please login to your account.</p>
@@ -56,13 +56,14 @@ import { AuthService } from '../../auth/auth.service';
                 [class.is-invalid]="passwordInput.invalid && passwordInput.touched"
                 placeholder="Enter your password"
               >
-              <i 
-                class="fas" 
-                [class.fa-eye]="!showPassword" 
-                [class.fa-eye-slash]="showPassword"
-                (click)="togglePasswordVisibility()"
+              <button 
+                type="button"
                 class="password-toggle"
-              ></i>
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+              </button>
             </div>
             <div class="invalid-feedback" *ngIf="passwordInput.invalid && passwordInput.touched">
               Password is required
@@ -144,16 +145,21 @@ import { AuthService } from '../../auth/auth.service';
     }
 
     .logo-placeholder {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-      border-radius: 50%;
+      width: 90px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 1rem;
-      color: white;
-      font-size: 2rem;
+      background: none;
+      border-radius: 0;
+    }
+
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     h1 {
@@ -187,25 +193,20 @@ import { AuthService } from '../../auth/auth.service';
 
     .input-wrapper {
       position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #666;
-      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-control {
       width: 100%;
-      padding: 0.875rem 1rem 0.875rem 2.5rem;
+      box-sizing: border-box;
+      padding: 0.75rem 2.5rem 0.75rem 2.5rem;
       border: 1.5px solid #e1e5eb;
       border-radius: 8px;
       font-size: 0.95rem;
       transition: all 0.2s ease;
       background: #f8fafc;
+      height: 42px;
     }
 
     .form-control:focus {
@@ -219,18 +220,50 @@ import { AuthService } from '../../auth/auth.service';
       color: #a0aec0;
     }
 
-    .password-toggle {
+    .input-icon {
       position: absolute;
-      right: 1rem;
+      left: 0.75rem;
       top: 50%;
       transform: translateY(-50%);
       color: #666;
+      font-size: 1rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0.25rem;
       cursor: pointer;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: color 0.2s;
+      z-index: 1;
     }
 
     .password-toggle:hover {
       color: #2196F3;
+    }
+
+    .password-toggle i {
+      font-size: 1rem;
+    }
+
+    .password-toggle:focus {
+      outline: none;
+    }
+
+    .password-toggle:focus-visible {
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
+      border-radius: 4px;
     }
 
     .is-invalid {
