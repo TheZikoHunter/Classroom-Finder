@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { DataService } from '../../services/data.service';
 import { Professor } from '../../models/professor.model';
 import { Subject } from '../../models/subject.model';
@@ -71,12 +71,19 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
               <tbody>
                 <tr *ngFor="let range of timeRanges">
                   <td class="time-cell">{{range.start}} - {{range.end}}</td>
-                  <td *ngFor="let day of days" class="slot-cell" (click)="assignTimeSlot(getTimeSlot(day, range))">
+                  <td *ngFor="let day of days"
+                      class="slot-cell"
+                      [class.planning-slot]="getTimeSlot(day, range)?.type === 'planning'"
+                      [class.reservation-slot]="getTimeSlot(day, range)?.type === 'reservation'"
+                      (click)="assignTimeSlot(getTimeSlot(day, range))">
                     <ng-container *ngIf="getTimeSlot(day, range) as slot">
                       <div *ngIf="slot.subject || slot.professor || slot.classroom" class="slot-content">
                         <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
                         <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
                         <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
+                        <button *ngIf="slot.type && (slot.idPlanning || slot.idReservation)" class="delete-btn" (click)="deleteSlot(slot); $event.stopPropagation()" title="Delete">
+                          🗑️
+                        </button>
                       </div>
                     </ng-container>
                   </td>
@@ -268,6 +275,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
       flex-direction: column;
       gap: 0.3rem;
       font-size: 0.95rem;
+      position: relative;
     }
 
     .slot-content .subject {
@@ -288,6 +296,28 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
       color: #ff9800;
       margin-top: 4px;
       font-style: italic;
+    }
+    .delete-btn {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      z-index: 2;
+      transition: background 0.2s;
+    }
+    .delete-btn:hover {
+      background: #c0392b;
     }
   `]
 })
@@ -320,7 +350,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private authService: AuthService
+    private authService: AuthService,
+    private http: HttpClient
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
@@ -434,6 +465,14 @@ export class DashboardComponent implements OnInit {
                     timeSlot.subject = planning.matiere;
                     timeSlot.professor = planning.professeur;
                     timeSlot.classroom = planning.salle;
+                    timeSlot.type = planning.type;
+                    if (planning.type === 'reservation') {
+                      timeSlot.reservationDate = planning.reservationDate;
+                      timeSlot.idReservation = planning.idReservation;
+                    }
+                    if (planning.type === 'planning') {
+                      timeSlot.idPlanning = planning.idPlanning;
+                    }
                   }
                 }
               } else {
@@ -587,5 +626,19 @@ export class DashboardComponent implements OnInit {
       value: subject.id,
       label: subject.nomMatiere
     }));
+  }
+
+  deleteSlot(slot: any): void {
+    if (slot.type === 'planning' && slot.idPlanning) {
+      this.http.delete(`http://localhost:8090/api/plannings/${slot.idPlanning}`).subscribe({
+        next: () => this.onMajorChange({ target: { value: this.selectedMajorId } } as any),
+        error: err => alert('Failed to delete planning: ' + err?.error || err)
+      });
+    } else if (slot.type === 'reservation' && slot.idReservation) {
+      this.http.delete(`http://localhost:8090/api/reservations/${slot.idReservation}`).subscribe({
+        next: () => this.onMajorChange({ target: { value: this.selectedMajorId } } as any),
+        error: err => alert('Failed to delete reservation: ' + err?.error || err)
+      });
+    }
   }
 } 

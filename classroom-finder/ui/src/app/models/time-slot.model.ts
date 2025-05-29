@@ -12,4 +12,6 @@ export interface TimeSlot {
   reservationDate?: string | null; // ISO date string for temporary reservations
   type?: 'planning' | 'reservation' | null; // Type of the time slot: planning or reservation
   horaireId?: number; // ID of the horaire (time slot) in the database
+  idPlanning?: number;
+  idReservation?: number;
 } 
