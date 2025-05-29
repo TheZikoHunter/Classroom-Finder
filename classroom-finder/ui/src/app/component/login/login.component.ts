@@ -64,6 +64,13 @@ import { AuthService } from '../../auth/auth.service';
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      background: linear-gradient(135deg, #f0f4f8 0%,rgb(140, 170, 205) 100%);
+    }
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       background-color: #f5f5f5;
     }
 
