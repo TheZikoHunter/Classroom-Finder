@@ -81,10 +81,10 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
                         <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
                         <div *ngIf="slot.professor" class="professor">{{slot.professor.nomProfesseur}}</div>
                         <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
-                        <button *ngIf="slot.type && (slot.idPlanning || slot.idReservation)" class="delete-btn" (click)="deleteSlot(slot); $event.stopPropagation()" title="Delete">
-                          <img src="assets/images/delete.png" alt="Delete" class="delete-icon" />
-                        </button>
                       </div>
+                      <button *ngIf="slot.type && (slot.idPlanning || slot.idReservation)" class="delete-btn" (click)="deleteSlot(slot); $event.stopPropagation()" title="Delete">
+                        <img src="assets/images/delete.png" alt="Delete" class="delete-icon" />
+                      </button>
                     </ng-container>
                   </td>
                 </tr>
@@ -301,7 +301,7 @@ import { EntityManagementComponent } from '../entity-management/entity-managemen
       position: absolute;
       right: 0;
       bottom: 0;
-      margin: 4px;
+      margin: 2px;
       color: #fff;
       border: none;
       border-radius: 50%;
