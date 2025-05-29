@@ -1,11 +1,22 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './component/dashboard/dashboard.component';
+import { LandingPageComponent } from './component/landing-page/landing-page.component';
 import { LoginComponent } from './component/login/login.component';
-import { authGuard } from './guards/auth.guard';
+import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { ProfessorTimetableComponent } from './component/professor-timetable/professor-timetable.component';
+import { AuthGuard } from './auth/auth.guard';
+
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: LandingPageComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'professor-timetable', component: ProfessorTimetableComponent, canActivate: [authGuard] }
+  { 
+    path: 'dashboard', 
+    component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'professor-timetable', 
+    component: ProfessorTimetableComponent,
+    canActivate: [AuthGuard]
+  },
+  { path: '**', redirectTo: '' }
 ];
