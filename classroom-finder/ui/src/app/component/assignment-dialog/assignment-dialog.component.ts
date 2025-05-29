@@ -47,8 +47,12 @@ import { DataService, Planning } from '../../services/data.service';
         </div>
         <div class="form-group" *ngIf="showReservationDate">
           <label>Reservation Date (Optional):</label>
-          <input type="date" [(ngModel)]="reservationDate" class="form-control" [min]="minDate">
-          <small class="help-text">Leave empty for permanent assignment</small>
+          <input type="date" [(ngModel)]="reservationDate" class="form-control" 
+                 [min]="minDate" [max]="maxDate">
+          <small class="help-text">Select a date that falls on {{timeSlot.day}}</small>
+          <small *ngIf="reservationDate && !isValid()" class="help-text text-warning">
+            Selected date must be a {{timeSlot.day}}
+          </small>
         </div>
         <div class="dialog-actions">
           <button class="btn-cancel" (click)="onCancel()">Cancel</button>
@@ -133,6 +137,8 @@ import { DataService, Planning } from '../../services/data.service';
 
     .text-warning {
       color: #f44336;
+      display: block;
+      margin-top: 4px;
     }
   `]
 })
@@ -153,6 +159,7 @@ export class AssignmentDialogComponent implements OnInit {
   selectedClassroom: Classroom | null = null;
   reservationDate: string | null = null;
   minDate: string;
+  maxDate: string = new Date().toISOString().split('T')[0];
   availableClassrooms: Classroom[] = [];
 
   constructor(private dataService: DataService) {
@@ -184,13 +191,54 @@ export class AssignmentDialogComponent implements OnInit {
           }
         });
       }
+
+      // Set min and max dates based on the selected day
+      if (this.showReservationDate) {
+        const today = new Date();
+        const selectedDay = this.getDayOfWeek(this.timeSlot.day);
+        const currentDay = today.getDay();
+        
+        // Calculate days until the selected day
+        let daysUntilSelected = selectedDay - currentDay;
+        if (daysUntilSelected < 0) {
+          daysUntilSelected += 7; // Move to next week
+        }
+        
+        // Set min date to the selected day
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + daysUntilSelected);
+        this.minDate = minDate.toISOString().split('T')[0];
+        
+        // Set max date to 2 weeks from the selected day
+        const maxDate = new Date(minDate);
+        maxDate.setDate(minDate.getDate() + 14);
+        this.maxDate = maxDate.toISOString().split('T')[0];
+      }
     }
   }
 
+  private getDayOfWeek(day: string): number {
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    return days.indexOf(day.toLowerCase());
+  }
+
   isValid(): boolean {
-    return !!this.selectedSubject && 
-           (this.hideProfessorSelect || !!this.selectedProfessor) && 
-           !!this.selectedClassroom;
+    if (!this.selectedSubject || !this.selectedClassroom || 
+        (this.hideProfessorSelect ? false : !this.selectedProfessor)) {
+      return false;
+    }
+
+    if (this.showReservationDate && this.reservationDate) {
+      const selectedDate = new Date(this.reservationDate);
+      const dayOfWeek = selectedDate.getDay();
+      const expectedDay = this.getDayOfWeek(this.timeSlot.day);
+      
+      if (dayOfWeek !== expectedDay) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private getHoraireId(): number {
@@ -252,6 +300,17 @@ export class AssignmentDialogComponent implements OnInit {
         return;
       }
 
+      if (this.showReservationDate && this.reservationDate) {
+        const selectedDate = new Date(this.reservationDate);
+        const dayOfWeek = selectedDate.getDay();
+        const expectedDay = this.getDayOfWeek(this.timeSlot.day);
+        
+        if (dayOfWeek !== expectedDay) {
+          alert(`Please select a date that falls on ${this.timeSlot.day}`);
+          return;
+        }
+      }
+
       const planning: Planning = {
         idMatiere: this.selectedSubject!.id,
         idHoraire: horaireId,
@@ -278,6 +337,20 @@ export class AssignmentDialogComponent implements OnInit {
           alert('Failed to save the time slot assignment');
         }
       });
+    } else {
+      if (this.showReservationDate && this.reservationDate) {
+        const selectedDate = new Date(this.reservationDate);
+        const dayOfWeek = selectedDate.getDay();
+        const expectedDay = this.getDayOfWeek(this.timeSlot.day);
+        
+        if (dayOfWeek !== expectedDay) {
+          alert(`Please select a date that falls on ${this.timeSlot.day}`);
+        } else {
+          alert('Please fill in all required fields');
+        }
+      } else {
+        alert('Please fill in all required fields');
+      }
     }
   }
 
