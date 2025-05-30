@@ -5,18 +5,19 @@ import jakarta.persistence.*;
 public class Administrateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_administrateur;
+    private int idAdministrateur;
     private String email;
-    private String mot_de_passe;
+    @Column(name = "mot_de_passe")
+    private String motDePasse;
     private String nom;
     private String prenom;
 
 
 
-    public Administrateur(int id_administrateur, String email, String mot_de_passe, String nom, String prenom) {
-        this.id_administrateur = id_administrateur;
+    public Administrateur(int idAdministrateur, String email, String motDePasse, String nom, String prenom) {
+        this.idAdministrateur = idAdministrateur;
         this.email = email;
-        this.mot_de_passe = mot_de_passe;
+        this.motDePasse = motDePasse;
         this.nom = nom;
         this.prenom = prenom;
     }
@@ -24,12 +25,12 @@ public class Administrateur {
     public Administrateur() {
     }
 
-    public int getId_administrateur() {
-        return id_administrateur;
+    public int getIdAdministrateur() {
+        return idAdministrateur;
     }
 
-    public void setId_administrateur(int id_administrateur) {
-        this.id_administrateur = id_administrateur;
+    public void setIdAdministrateur(int idAdministrateur) {
+        this.idAdministrateur = idAdministrateur;
     }
 
     public String getEmail() {
@@ -40,12 +41,12 @@ public class Administrateur {
         this.email = email;
     }
 
-    public String getMot_de_passe() {
-        return mot_de_passe;
+    public String getMotDePasse() {
+        return motDePasse;
     }
 
-    public void setMot_de_passe(String mot_de_passe) {
-        this.mot_de_passe = mot_de_passe;
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
     }
 
 

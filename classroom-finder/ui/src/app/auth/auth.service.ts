@@ -66,11 +66,11 @@ export class AuthService {
     return throwError(() => errorMessage);
   }
 
-  login(email: string, password: string): Observable<any> {
-    console.log('Attempting login with:', { email, password });
+  login(email: string, motDePasse: string): Observable<any> {
+    console.log('Attempting login with:', { email, motDePasse });
     console.log('API URL:', `${this.API_URL}/api/auth/login`);
-    
-    return this.http.post<any>(`${this.API_URL}/api/auth/login`, { email, password }).pipe(
+
+    return this.http.post<any>(`${this.API_URL}/api/auth/login`, { email, motDePasse }).pipe(
       tap(response => {
         console.log('Login response:', response);
         if (response.token) {

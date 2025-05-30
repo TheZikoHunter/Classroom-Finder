@@ -48,8 +48,8 @@ import { AuthService } from '../../auth/auth.service';
               <input
                 [type]="showPassword ? 'text' : 'password'"
                 id="password"
-                name="password"
-                [(ngModel)]="password"
+                name="motDePasse"
+                [(ngModel)]="motDePasse"
                 required
                 #passwordInput="ngModel"
                 class="form-control"
@@ -391,7 +391,7 @@ import { AuthService } from '../../auth/auth.service';
 })
 export class LoginComponent {
   email: string = '';
-  password: string = '';
+  motDePasse: string = '';
   errorMessage: string = '';
   rememberMe: boolean = false;
   showPassword: boolean = false;
@@ -410,14 +410,27 @@ export class LoginComponent {
     this.errorMessage = '';
     this.isLoading = true;
 
-    this.authService.login(this.email, this.password).subscribe({
-      next: () => {
+    const credentials = {
+    email: this.email,
+    motDePasse: this.motDePasse
+  };
+
+    this.authService.login(this.email, this.motDePasse).subscribe({
+      next: (user) => {
+        console.log('Login successful:', user);
         this.isLoading = false;
-        // Navigation is handled by the auth service based on user role
+        // Navigate based on user role
+        if (user.role === 'ADMIN') {
+          this.router.navigate(['/admin-dashboard']);
+        } else if (user.role === 'PROFESSOR') {
+          this.router.navigate(['/professor-dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
-      error: (errorMessage: string) => {
-        console.error('Login error:', errorMessage);
-        this.errorMessage = errorMessage;
+      error: (error) => {
+        console.error('Login error:', error);
+        this.errorMessage = 'Invalid credentials';
         this.isLoading = false;
       }
     });

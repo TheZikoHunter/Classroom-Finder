@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError, map } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface User {
@@ -11,8 +11,13 @@ export interface User {
 }
 
 export interface LoginCredentials {
-  username: string;
-  password: string;
+  email: string;        // Changed from username to email
+  motDePasse: string;   // Changed from password to motDePasse
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
 }
 
 @Injectable({
@@ -22,6 +27,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private readonly TOKEN_KEY = 'auth_token';
+  private readonly API_URL = 'http://localhost:8090/api/auth'; // Your backend URL
 
   constructor(
     private http: HttpClient,
@@ -30,39 +36,40 @@ export class AuthService {
     // Check for stored token on service initialization
     const token = localStorage.getItem(this.TOKEN_KEY);
     if (token) {
-      // In a real app, you would validate the token here
-      this.currentUserSubject.next({
-        id: 1,
-        username: 'admin',
-        email: 'admin@example.com',
-        role: 'admin'
-      });
+      // You can add token validation here if needed
+      const storedUser = localStorage.getItem('current_user');
+      if (storedUser) {
+        this.currentUserSubject.next(JSON.parse(storedUser));
+      }
     }
   }
 
   login(credentials: LoginCredentials): Observable<User> {
-    // In a real app, this would be an API call
-    // For now, we'll simulate a successful login
-    return new Observable<User>(observer => {
-      if (credentials.username === 'admin' && credentials.password === 'admin') {
-        const user: User = {
-          id: 1,
-          username: 'admin',
-          email: 'admin@example.com',
-          role: 'admin'
-        };
-        localStorage.setItem(this.TOKEN_KEY, 'dummy-token');
-        this.currentUserSubject.next(user);
-        observer.next(user);
-        observer.complete();
-      } else {
-        observer.error('Invalid credentials');
-      }
-    });
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials)
+      .pipe(
+        tap(response => {
+          // Store token and user data
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+          localStorage.setItem('current_user', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }),
+        // Map the response to just the user object
+        // Import 'map' from 'rxjs/operators' at the top if not already imported
+        // import { map } from 'rxjs/operators';
+        // Or use: import { map } from 'rxjs';
+        // Here, using 'map' from 'rxjs'
+        // Add 'map' to the import statement at the top
+        map(response => response.user),
+        catchError(error => {
+          console.error('Login error:', error);
+          return throwError(() => new Error('Invalid credentials'));
+        })
+      );
   }
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem('current_user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -74,4 +81,8 @@ export class AuthService {
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
-} 
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+}

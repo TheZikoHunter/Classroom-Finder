@@ -5,9 +5,9 @@ import com.spring.classroom_finder.repository.AdministrateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,11 +18,14 @@ public class AdministrateurController {
     @Autowired
     private AdministrateurRepository administrateurRepository;
 
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     // Get all Administrateurs
     @GetMapping
     public ResponseEntity<List<Administrateur>> getAllAdministrateurs(@RequestParam(required = false) String nom) {
         try {
-            List<Administrateur> administrateurs = new ArrayList<>();
+            List<Administrateur> administrateurs;
 
             if (nom == null)
                 administrateurs = administrateurRepository.findAll();
@@ -49,12 +52,14 @@ public class AdministrateurController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Create a new Administrateur
     @PostMapping
     public ResponseEntity<Administrateur> createAdministrateur(@RequestBody Administrateur administrateur) {
         try {
-            Administrateur _administrateur = administrateurRepository.save(administrateur);
-            return new ResponseEntity<>(_administrateur, HttpStatus.CREATED);
+            // Hash the password before saving
+            administrateur.setMotDePasse(passwordEncoder.encode(administrateur.getMotDePasse()));
+            
+            Administrateur savedAdmin = administrateurRepository.save(administrateur);
+            return new ResponseEntity<>(savedAdmin, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

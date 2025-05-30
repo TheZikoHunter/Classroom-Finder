@@ -18,6 +18,9 @@ public class ProfesseurController {
     @Autowired
     private ProfesseurRepository professeurRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     // Get all Professeurs
     @GetMapping
     public ResponseEntity<List<Professeur>> getAllProfesseurs(@RequestParam(required = false) String nom) {
@@ -51,31 +54,39 @@ public class ProfesseurController {
 
     // Create a new Professeur
     @PostMapping
-    public ResponseEntity<Professeur> createProfesseur(@RequestBody Professeur professeur) {
-        try {
-            Professeur _professeur = professeurRepository.save(professeur);
-            return new ResponseEntity<>(_professeur, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+public ResponseEntity<Professeur> createProfesseur(@RequestBody Professeur professeur) {
+    try {
+        // Hash the password before saving
+        professeur.setMot_de_passe(passwordEncoder.encode(professeur.getMot_de_passe()));
+        
+        Professeur savedProf = professeurRepository.save(professeur);
+        return new ResponseEntity<>(savedProf, HttpStatus.CREATED);
+    } catch (Exception e) {
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+}
 
     // Update a Professeur
-    @PutMapping("/{id}")
-    public ResponseEntity<Professeur> updateProfesseur(@PathVariable("id") int id, @RequestBody Professeur professeur) {
-        Optional<Professeur> professeurData = professeurRepository.findById(id);
+@PutMapping("/{id}")
+public ResponseEntity<Professeur> updateProfesseur(@PathVariable("id") int id, @RequestBody Professeur professeur) {
+    Optional<Professeur> profData = professeurRepository.findById(id);
 
-        if (professeurData.isPresent()) {
-            Professeur _professeur = professeurData.get();
-            _professeur.setNomProfesseur(professeur.getNomProfesseur());
-            _professeur.setPrenomProfesseur(professeur.getPrenomProfesseur());
-            _professeur.setEmail(professeur.getEmail());
-            // Update other fields as needed
-            return new ResponseEntity<>(professeurRepository.save(_professeur), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    if (profData.isPresent()) {
+        Professeur existingProf = profData.get();
+        existingProf.setNomProfesseur(professeur.getNomProfesseur());
+        existingProf.setPrenomProfesseur(professeur.getPrenomProfesseur());
+        existingProf.setEmail(professeur.getEmail());
+        
+        // Only hash password if it's being changed
+        if (professeur.getMot_de_passe() != null && !professeur.getMot_de_passe().isEmpty()) {
+            existingProf.setMot_de_passe(passwordEncoder.encode(professeur.getMot_de_passe()));
         }
+        
+        return new ResponseEntity<>(professeurRepository.save(existingProf), HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+}
 
     // Delete a Professeur
     @DeleteMapping("/{id}")
