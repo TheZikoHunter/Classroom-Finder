@@ -4,11 +4,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Professor } from '../../models/professor.model';
 import { DataService, ApiResponse } from '../../services/data.service';
+import { ToastService } from '../../services/toast.service';
+import { ToastContainerComponent } from '../toast-container/toast-container.component';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastContainerComponent],
   templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
@@ -21,7 +23,8 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private toastService: ToastService
   ) {
     this.professorForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -45,7 +48,9 @@ export class UserManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading professors:', error);
-        this.errorMessage = 'Failed to load professors. Please try again.';
+        const errorMsg = 'Failed to load professors. Please try again.';
+        this.toastService.showError(errorMsg);
+        this.errorMessage = errorMsg;
       }
     });
   }
@@ -96,11 +101,13 @@ export class UserManagementComponent implements OnInit {
             next: (response: ApiResponse) => {
               console.log('Update response received:', response);
               if (response.success) {
+                this.toastService.showSuccess(response.message || 'Professor updated successfully! 🎉');
                 this.successMessage = response.message;
                 setTimeout(() => this.successMessage = '', 3000);
                 this.resetForm();
                 this.loadProfessors();
               } else {
+                this.toastService.showError(response.message || 'Failed to update professor');
                 this.errorMessage = response.message;
                 setTimeout(() => this.errorMessage = '', 5000);
               }
@@ -108,7 +115,9 @@ export class UserManagementComponent implements OnInit {
             error: (error) => {
               console.error('Error updating professor:', error);
               console.error('Error details:', error.error);
-              this.errorMessage = error.error?.message || 'Failed to update professor. Please try again.';
+              const errorMsg = error.error?.message || 'Failed to update professor. Please try again.';
+              this.toastService.showError(errorMsg);
+              this.errorMessage = errorMsg;
               setTimeout(() => this.errorMessage = '', 5000);
             }
           });
@@ -121,18 +130,22 @@ export class UserManagementComponent implements OnInit {
             next: (response: ApiResponse) => {
               console.log('Create response received:', response);
               if (response.success) {
+                this.toastService.showSuccess(response.message || 'Professor created successfully! 🎉');
                 this.successMessage = response.message;
                 setTimeout(() => this.successMessage = '', 3000);
                 this.resetForm();
                 this.loadProfessors();
               } else {
+                this.toastService.showError(response.message || 'Failed to create professor');
                 this.errorMessage = response.message;
                 setTimeout(() => this.errorMessage = '', 5000);
               }
             },
             error: (error) => {
               console.error('Error creating professor:', error);
-              this.errorMessage = error.error?.message || 'Failed to create professor. Please try again.';
+              const errorMsg = error.error?.message || 'Failed to create professor. Please try again.';
+              this.toastService.showError(errorMsg);
+              this.errorMessage = errorMsg;
               setTimeout(() => this.errorMessage = '', 5000);
             }
           });
@@ -140,7 +153,9 @@ export class UserManagementComponent implements OnInit {
     } else {
       console.log('Form validation failed');
       console.log('Form errors:', this.getFormErrors());
-      this.errorMessage = 'Please fill in all required fields correctly.';
+      const errorMsg = 'Please fill in all required fields correctly.';
+      this.toastService.showWarning(errorMsg);
+      this.errorMessage = errorMsg;
       setTimeout(() => this.errorMessage = '', 5000);
     }
   }
@@ -171,6 +186,9 @@ export class UserManagementComponent implements OnInit {
     this.professorForm.get('motDePasse')?.updateValueAndValidity();
     
     console.log('Password validators cleared for editing mode');
+    
+    // Show info toast
+    this.toastService.showInfo(`Editing ${professor.nomProfesseur} ${professor.prenomProfesseur}. Leave password empty to keep current password. ✏️`);
   }
 
   deleteProfessor(id: number): void {
@@ -181,17 +199,21 @@ export class UserManagementComponent implements OnInit {
           next: (response: ApiResponse) => {
             console.log('Professor deleted successfully');
             if (response.success) {
+              this.toastService.showSuccess(response.message || 'Professor deleted successfully! 🗑️');
               this.successMessage = response.message;
               setTimeout(() => this.successMessage = '', 3000);
               this.loadProfessors();
             } else {
+              this.toastService.showError(response.message || 'Failed to delete professor');
               this.errorMessage = response.message;
               setTimeout(() => this.errorMessage = '', 5000);
             }
           },
           error: (error) => {
             console.error('Error deleting professor:', error);
-            this.errorMessage = error.error?.message || 'Failed to delete professor. Please try again.';
+            const errorMsg = error.error?.message || 'Failed to delete professor. Please try again.';
+            this.toastService.showError(errorMsg);
+            this.errorMessage = errorMsg;
             setTimeout(() => this.errorMessage = '', 5000);
           }
         });
