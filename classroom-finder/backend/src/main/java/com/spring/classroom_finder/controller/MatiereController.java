@@ -48,12 +48,12 @@ public class MatiereController {
     // Get a Matiere by id
     @GetMapping("/{id}")
     public ResponseEntity<Matiere> getMatiereById(@PathVariable("id") int id) {
-        List<Matiere> matiereData = matiereRepository.findById(id); // méthode personnalisée
+        java.util.Optional<Matiere> matiereData = matiereRepository.findById(id);
 
-        if (matiereData.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (matiereData.isPresent()) {
+            return new ResponseEntity<>(matiereData.get(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(matiereData.get(0), HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

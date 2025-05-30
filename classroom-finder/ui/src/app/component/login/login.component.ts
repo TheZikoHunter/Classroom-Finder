@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -411,21 +411,22 @@ export class LoginComponent {
     this.isLoading = true;
 
     const credentials = {
-    email: this.email,
-    motDePasse: this.motDePasse
-  };
+      email: this.email,
+      motDePasse: this.motDePasse
+    };
 
-    this.authService.login(this.email, this.motDePasse).subscribe({
+    this.authService.login(credentials).subscribe({
       next: (user) => {
         console.log('Login successful:', user);
         this.isLoading = false;
-        // Navigate based on user role
+        
+        // Redirect based on user role
         if (user.role === 'ADMIN') {
-          this.router.navigate(['/admin-dashboard']);
+          this.router.navigate(['/dashboard']);
         } else if (user.role === 'PROFESSOR') {
           this.router.navigate(['/professor-dashboard']);
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/']);
         }
       },
       error: (error) => {
@@ -435,4 +436,5 @@ export class LoginComponent {
       }
     });
   }
+
 }

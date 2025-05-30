@@ -34,6 +34,10 @@ export class DataService {
     return this.http.get<Professor[]>(`${this.apiUrl}/professeurs`);
   }
 
+  getProfessorById(idProfesseur: number): Observable<Professor> {
+    return this.http.get<Professor>(`${this.apiUrl}/professeurs/${idProfesseur}`);
+  }
+
   createProfessor(professor: Omit<Professor, 'idProfesseur'>): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.apiUrl}/professeurs`, professor);
   }
@@ -49,6 +53,11 @@ export class DataService {
   // Subject operations
   getSubjects(): Observable<Subject[]> {
     return this.http.get<Subject[]>(`${this.apiUrl}/matieres`);
+  }
+
+  // Get subjects assigned to a specific professor using the new assignment system
+  getSubjectsByProfessor(professorId: number): Observable<Subject[]> {
+    return this.http.get<Subject[]>(`${this.apiUrl}/professor-subjects/professor/${professorId}`);
   }
 
   createSubject(subject: { nomMatiere: string }): Observable<Subject> {
@@ -102,6 +111,28 @@ export class DataService {
     // Fetch both plannings and reservations
     const plannings$ = this.http.get<any[]>(`${this.apiUrl}/plannings/recherche-par-filiere/${majorId}`);
     const reservations$ = this.http.get<any[]>(`${this.apiUrl}/reservations/recherche-par-filiere/${majorId}`);
+
+    // Combine both observables and merge their results
+    return forkJoin({
+      plannings: plannings$,
+      reservations: reservations$
+    }).pipe(
+      map(({ plannings, reservations }) => {
+        // Add a type field to distinguish between plannings and reservations
+        const typedPlannings = plannings.map(p => ({ ...p, type: 'planning' }));
+        const typedReservations = reservations.map(r => ({ ...r, type: 'reservation' }));
+        
+        // Combine both arrays
+        return [...typedPlannings, ...typedReservations];
+      })
+    );
+  }
+
+  // Get timetable (plannings and reservations) for a specific professor
+  getTimetableByProfessor(professorId: number): Observable<any[]> {
+    // Fetch both plannings and reservations for the professor
+    const plannings$ = this.http.get<any[]>(`${this.apiUrl}/plannings/professor/${professorId}`);
+    const reservations$ = this.http.get<any[]>(`${this.apiUrl}/reservations/professor/${professorId}`);
 
     // Combine both observables and merge their results
     return forkJoin({

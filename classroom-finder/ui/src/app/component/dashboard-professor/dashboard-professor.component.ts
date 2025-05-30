@@ -21,6 +21,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./dashboard-professor.component.scss']
 })
 export class DashboardProfessorComponent implements OnInit {
+  professorName: string = '';
   activePanel: 'timetable' | 'schedule' = 'timetable';
   currentProfessor: any;
 
@@ -30,7 +31,10 @@ export class DashboardProfessorComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Get the current professor's information
+    // Always use the backend-provided username for the dashboard greeting
+    const user = this.authService.getCurrentUser();
+    this.professorName = user && user.username ? user.username : '';
+    // Optionally, you can still fetch the full professor object for other data if needed
     const professorId = this.authService.getCurrentUserId();
     if (professorId) {
       this.dataService.getProfessorById(professorId).subscribe({
@@ -51,4 +55,4 @@ export class DashboardProfessorComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
-} 
+}

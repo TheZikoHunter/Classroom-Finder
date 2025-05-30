@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.spring.classroom_finder.model.Filiere;
 import com.spring.classroom_finder.model.Horaire;
+import com.spring.classroom_finder.model.Matiere;
 import com.spring.classroom_finder.model.Professeur;
 import com.spring.classroom_finder.model.Reservation;
 import com.spring.classroom_finder.model.Salle;
@@ -45,4 +46,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // Custom query to find all distinct filieres (majors) that a professor has reservations for
     @Query("SELECT DISTINCT r.filiere FROM Reservation r WHERE r.professeur = :professeur")
     Set<Filiere> findAllFilieresByProfesseur(@Param("professeur") Professeur professeur);
+
+    // Custom query to find all distinct subjects (matieres) that a professor has reservations for
+    @Query("SELECT DISTINCT r.matiere FROM Reservation r WHERE r.professeur = :professeur")
+    Set<Matiere> findAllMatieresByProfesseur(@Param("professeur") Professeur professeur);
 } 

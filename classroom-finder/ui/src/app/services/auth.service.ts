@@ -44,7 +44,7 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<User> {
+  login(credentials: { email: string, motDePasse: string }): Observable<any> {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
@@ -71,18 +71,40 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem('current_user');
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login']); // Always redirect to login page
   }
 
   isAuthenticated(): boolean {
-    return !!this.currentUserSubject.value;
+    // Return true if user/token exists
+    return !!this.getCurrentUser();
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    // Always read from 'current_user'
+    return this.currentUserSubject.value || JSON.parse(localStorage.getItem('current_user') || 'null');
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  getCurrentUserId(): number | null {
+    const user = this.getCurrentUser();
+    return user ? user.id : null;
+  }
+
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'ADMIN';
+  }
+
+  isProfessor(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'PROFESSOR';
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === role;
   }
 }

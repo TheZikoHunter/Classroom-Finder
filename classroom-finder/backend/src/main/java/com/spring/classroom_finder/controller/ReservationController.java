@@ -161,6 +161,28 @@ public class ReservationController {
         return new ResponseEntity<>(filieres, HttpStatus.OK);
     }
 
+    /**
+     * Get all reservations for a specific professor
+     * @param professorId The ID of the professor
+     * @return A list of Reservation objects
+     */
+    @GetMapping("/professor/{professorId}")
+    public ResponseEntity<?> getReservationsByProfessor(@PathVariable int professorId) {
+        try {
+            Optional<Professeur> professeur = professeurRepository.findById(professorId);
+
+            if (professeur.isEmpty()) {
+                return new ResponseEntity<>("Professor not found", HttpStatus.NOT_FOUND);
+            }
+
+            List<Reservation> reservations = reservationRepository.findByProfesseur(professeur.get());
+            return new ResponseEntity<>(reservations, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error getting professor reservations: " + e.getMessage(), 
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/recherche-par-filiere/{filiereId}")
     public ResponseEntity<?> rechercheParFiliere(@PathVariable int filiereId) {
         Optional<Filiere> filiere = filiereRepository.findById(filiereId);

@@ -22,6 +22,7 @@ import com.spring.classroom_finder.model.Horaire;
 import com.spring.classroom_finder.model.Matiere;
 import com.spring.classroom_finder.model.Planning;
 import com.spring.classroom_finder.model.Professeur;
+import com.spring.classroom_finder.model.ProfesseurMatiere;
 import com.spring.classroom_finder.model.Reservation;
 import com.spring.classroom_finder.model.Salle;
 import com.spring.classroom_finder.repository.FiliereRepository;
@@ -29,6 +30,7 @@ import com.spring.classroom_finder.repository.HoraireRepository;
 import com.spring.classroom_finder.repository.MatiereRepository;
 import com.spring.classroom_finder.repository.PlanningRepository;
 import com.spring.classroom_finder.repository.ProfesseurRepository;
+import com.spring.classroom_finder.repository.ProfesseurMatiereRepository;
 import com.spring.classroom_finder.repository.ReservationRepository;
 import com.spring.classroom_finder.repository.SalleRepository;
 
@@ -43,6 +45,7 @@ public class PlanningController {
     private final MatiereRepository matiereRepository;
     private final HoraireRepository horaireRepository;
     private final SalleRepository salleRepository;
+    private final ProfesseurMatiereRepository professeurMatiereRepository;
 
     @Autowired
     public PlanningController(
@@ -52,7 +55,8 @@ public class PlanningController {
             FiliereRepository filiereRepository,
             MatiereRepository matiereRepository,
             HoraireRepository horaireRepository,
-            SalleRepository salleRepository
+            SalleRepository salleRepository,
+            ProfesseurMatiereRepository professeurMatiereRepository
             ) {
         this.planningRepository = planningRepository;
         this.reservationRepository = reservationRepository;
@@ -61,6 +65,7 @@ public class PlanningController {
         this.matiereRepository = matiereRepository;
         this.horaireRepository = horaireRepository;
         this.salleRepository = salleRepository;
+        this.professeurMatiereRepository = professeurMatiereRepository;
     }
 
     @GetMapping
@@ -127,6 +132,10 @@ public class PlanningController {
                 
                 // Save the reservation
                 Reservation savedReservation = reservationRepository.save(reservation);
+                
+                // Auto-assign subject to professor in professeur_matiere table
+                autoAssignSubjectToProfessor(professeur, matiereOpt.get());
+                
                 return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
             } else {
                 // Create new Planning object with found entities
@@ -142,6 +151,10 @@ public class PlanningController {
                 
                 // Save the planning
                 Planning savedPlanning = planningRepository.save(planning);
+                
+                // Auto-assign subject to professor in professeur_matiere table
+                autoAssignSubjectToProfessor(professeurOpt.get(), matiereOpt.get());
+                
                 return new ResponseEntity<>(savedPlanning, HttpStatus.CREATED);
             }
             
@@ -276,6 +289,48 @@ public class PlanningController {
     }
 
     /**
+     * Search for all subjects (matières) assigned to a specific professor
+     *
+     * @param professorId The ID of the professor
+     * @return A set of Matiere objects assigned to the professor
+     */
+    @GetMapping("/recherche-matiere-par-prof/{professorId}")
+    public ResponseEntity<?> rechercheMatiereParProf(@PathVariable int professorId) {
+        Optional<Professeur> professeur = professeurRepository.findById(professorId);
+
+        if (professeur.isEmpty()) {
+            return new ResponseEntity<>("Professor not found", HttpStatus.NOT_FOUND);
+        }
+
+        // Use the new professor-subject assignment system
+        Set<Matiere> matieres = professeurMatiereRepository.findMatieresByProfesseur(professeur.get());
+        
+        return new ResponseEntity<>(matieres, HttpStatus.OK);
+    }
+
+    /**
+     * Get all plannings for a specific professor
+     * @param professorId The ID of the professor
+     * @return A list of Planning objects
+     */
+    @GetMapping("/professor/{professorId}")
+    public ResponseEntity<?> getPlanningsByProfessor(@PathVariable int professorId) {
+        try {
+            Optional<Professeur> professeur = professeurRepository.findById(professorId);
+
+            if (professeur.isEmpty()) {
+                return new ResponseEntity<>("Professor not found", HttpStatus.NOT_FOUND);
+            }
+
+            List<Planning> plannings = planningRepository.findByProfesseur(professeur.get());
+            return new ResponseEntity<>(plannings, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error getting professor plannings: " + e.getMessage(), 
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Validate that there are no conflicts with existing planning entries
      */
     private void validateNoConflicts(Planning planning) throws PlanningConflictException {
@@ -345,6 +400,24 @@ public class PlanningController {
 
         if (!filiereConflicts.isEmpty()) {
             throw new ReservationConflictException("Major already has a class scheduled for this time slot and date");
+        }
+    }
+
+    /**
+     * Auto-assign a subject to a professor in the professeur_matiere table
+     * This ensures that when a professor is assigned to teach a subject in a planning,
+     * they are automatically authorized to teach that subject.
+     */
+    private void autoAssignSubjectToProfessor(Professeur professeur, Matiere matiere) {
+        // Check if the assignment already exists
+        boolean exists = professeurMatiereRepository.existsByProfesseurAndMatiere(professeur, matiere);
+        
+        if (!exists) {
+            // Create new assignment
+            ProfesseurMatiere assignment = new ProfesseurMatiere();
+            assignment.setProfesseur(professeur);
+            assignment.setMatiere(matiere);
+            professeurMatiereRepository.save(assignment);
         }
     }
 

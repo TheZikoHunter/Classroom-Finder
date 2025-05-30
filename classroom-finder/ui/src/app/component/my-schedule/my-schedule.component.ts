@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 import { TimeSlot } from '../../models/time-slot.model';
 import { Planning } from '../../models/planning.model';
 import { Reservation } from '../../models/reservation.model';
@@ -27,8 +28,18 @@ import { Reservation } from '../../models/reservation.model';
       </div>
 
       <div class="schedule-content">
+        <!-- Loading state -->
+        <div *ngIf="loading" class="loading-message">
+          Loading your schedule...
+        </div>
+
+        <!-- Error state -->
+        <div *ngIf="error" class="error-message">
+          {{error}}
+        </div>
+
         <!-- Regular Schedule (Plannings) -->
-        <div *ngIf="activeView === 'plannings'" class="timetable">
+        <div *ngIf="!loading && !error && activeView === 'plannings'" class="timetable">
           <table class="timetable-table">
             <thead>
               <tr>
@@ -56,7 +67,7 @@ import { Reservation } from '../../models/reservation.model';
         </div>
 
         <!-- Reservations -->
-        <div *ngIf="activeView === 'reservations'" class="timetable">
+        <div *ngIf="!loading && !error && activeView === 'reservations'" class="timetable">
           <table class="timetable-table">
             <thead>
               <tr>
@@ -70,10 +81,10 @@ import { Reservation } from '../../models/reservation.model';
                 <td *ngFor="let day of days" class="slot-cell"
                     [class.reservation-slot]="getTimeSlot(day, range, 'reservation')">
                   <ng-container *ngIf="getTimeSlot(day, range, 'reservation') as slot">
-                    <div *ngIf="slot.subject || slot.classroom" class="slot-content">
-                      <div *ngIf="slot.subject" class="subject">{{slot.subject.nomMatiere}}</div>
-                      <div *ngIf="slot.classroom" class="classroom">{{slot.classroom.nomSalle}}</div>
-                      <div *ngIf="slot.major" class="major">{{slot.major.nomFiliere}}</div>
+                    <div *ngIf="slot.matiere || slot.salle" class="slot-content">
+                      <div *ngIf="slot.matiere" class="subject">{{slot.matiere.nomMatiere}}</div>
+                      <div *ngIf="slot.salle" class="classroom">{{slot.salle.nomSalle}}</div>
+                      <div *ngIf="slot.filiere" class="major">{{slot.filiere.nomFiliere}}</div>
                       <div *ngIf="slot.reservationDate" class="reservation-date">
                         Reserved for: {{slot.reservationDate | date}}
                       </div>
@@ -209,8 +220,97 @@ import { Reservation } from '../../models/reservation.model';
       margin-top: 4px;
       font-style: italic;
     }
+
+    .loading-message {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 2rem;
+      color: #e74c3c;
+      background-color: #fdf2f2;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
   `]
 })
 export class MyScheduleComponent implements OnInit {
-  ngOnInit(): void {}
+  @Input() currentProfessor: any;
+  
+  activeView: 'plannings' | 'reservations' = 'plannings';
+  plannings: Planning[] = [];
+  reservations: Reservation[] = [];
+  loading = false;
+  error: string | null = null;
+  
+  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  timeRanges = [
+    { start: '08:30', end: '10:30' },
+    { start: '10:30', end: '12:30' },
+    { start: '14:00', end: '16:00' },
+    { start: '16:00', end: '18:00' }
+  ];
+
+  constructor(
+    private dataService: DataService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadScheduleData();
+  }
+
+  loadScheduleData(): void {
+    const currentUserId = this.authService.getCurrentUserId();
+    if (currentUserId) {
+      this.loading = true;
+      this.error = null;
+      
+      this.dataService.getTimetableByProfessor(currentUserId).subscribe({
+        next: (data) => {
+          // Separate plannings and reservations
+          this.plannings = data.filter(item => item.type === 'planning');
+          this.reservations = data.filter(item => item.type === 'reservation');
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading professor schedule:', error);
+          this.error = 'Failed to load schedule data';
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  getPlanningSlot(day: string, range: { start: string; end: string }): Planning | null {
+    // Find planning for this time slot
+    return this.plannings.find(planning => 
+      this.matchesTimeSlot(planning, day, range)
+    ) || null;
+  }
+
+  getTimeSlot(day: string, range: { start: string; end: string }, type: 'reservation'): Reservation | null {
+    // Find reservation for this time slot
+    return this.reservations.find(reservation => 
+      this.matchesTimeSlot(reservation, day, range)
+    ) || null;
+  }
+
+  private matchesTimeSlot(item: Planning | Reservation, day: string, range: { start: string; end: string }): boolean {
+    // Convert day to match the horaire system (1-6 for Monday-Saturday)
+    const dayIndex = this.days.indexOf(day);
+    const timeIndex = this.timeRanges.findIndex(r => r.start === range.start && r.end === range.end);
+    
+    if (dayIndex === -1 || timeIndex === -1) return false;
+    
+    // Calculate expected horaire ID (1-24)
+    const expectedHoraireId = (dayIndex * 4) + timeIndex + 1;
+    
+    return item.horaire?.idHoraire === expectedHoraireId;
+  }
 }

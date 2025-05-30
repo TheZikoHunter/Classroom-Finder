@@ -1,50 +1,136 @@
-<div class="dashboard-layout">
-  <nav class="sidebar">
-    <div class="sidebar-header">
-      <h2 class="text-white">Classroom Finder</h2>
-    </div>
-    
-    <ul class="nav-links">
-      <li [class.active]="activePanel === 'timetable'" (click)="setActivePanel('timetable')">
-        <i class="fas fa-calendar-alt"></i>
-        Timetable Management
-      </li>
-      <li [class.active]="activePanel === 'schedule'" (click)="setActivePanel('schedule')">
-        <i class="fas fa-clock"></i>
-        My Schedule
-      </li>
-    </ul>
-    
-    <div class="user-info">
-      <div class="user-profile">
-        <div class="avatar">
-          {{currentProfessor?.nomProfesseur?.charAt(0)}}{{currentProfessor?.prenomProfesseur?.charAt(0)}}
-        </div>
-        <div class="user-details">
-          <span class="user-name">{{currentProfessor?.nomProfesseur}} {{currentProfessor?.prenomProfesseur}}</span>
-          <span class="user-role">Professor</span>
-        </div>
+<div class="professor-dashboard-layout">
+  <header class="professor-header">
+    <div class="professor-info">
+      <img src="assets/images/logo.png" alt="Logo" class="professor-logo" />
+      <div class="professor-name-role">
+        <span class="professor-name">Welcome, {{ professorName }}</span>
+        <span class="professor-role">Professor</span>
       </div>
-      <button class="btn btn-danger w-100" (click)="logout()">
-        <i class="fas fa-sign-out-alt"></i>
-        Logout
-      </button>
     </div>
-  </nav>
+    <button class="logout-btn" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </header>
 
-  <main class="main-content">
-    <div class="content-header">
+  <main class="professor-main-content">
+    <div class="professor-content-header">
       <h1>{{activePanel === 'timetable' ? 'Timetable Management' : 'My Schedule'}}</h1>
     </div>
-
-    <div class="content-body">
+    <div class="professor-content-body">
       <div *ngIf="activePanel === 'timetable'" class="timetable-panel">
         <app-professor-timetable></app-professor-timetable>
       </div>
-
       <div *ngIf="activePanel === 'schedule'" class="schedule-panel">
         <app-my-schedule></app-my-schedule>
       </div>
     </div>
   </main>
-</div> 
+</div>
+
+<style>
+.professor-dashboard-layout {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  flex-direction: column;
+}
+.professor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2.5rem 1.5rem 2.5rem;
+  background: #1976d2;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+}
+.professor-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.professor-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+}
+.professor-name-role {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.professor-name {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.professor-role {
+  font-size: 1rem;
+  color: #bbdefb;
+}
+.logout-btn {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.logout-btn:hover {
+  background: #b71c1c;
+}
+.professor-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2.5rem 4vw 2.5rem 4vw;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.professor-content-header {
+  margin-bottom: 2rem;
+}
+.professor-content-header h1 {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #1976d2;
+  margin: 0;
+}
+.professor-content-body {
+  width: 100%;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.07);
+  padding: 2rem 2.5rem;
+  min-height: 400px;
+}
+@media (max-width: 900px) {
+  .professor-main-content {
+    padding: 1.5rem 2vw;
+  }
+  .professor-content-body {
+    padding: 1rem 1vw;
+  }
+}
+@media (max-width: 600px) {
+  .professor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1vw;
+  }
+  .professor-main-content {
+    padding: 1rem 1vw;
+  }
+}
+</style>

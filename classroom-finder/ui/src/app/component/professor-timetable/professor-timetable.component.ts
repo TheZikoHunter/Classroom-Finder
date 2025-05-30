@@ -281,15 +281,29 @@ export class ProfessorTimetableComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadData();
     this.initializeTimeSlots();
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
-      this.currentProfessor = {
-        idProfesseur: currentUser.id,
-        nomProfesseur: currentUser.email.split('@')[0],
-        prenomProfesseur: ''
-      };
+      // Get the actual professor data instead of just creating a basic object
+      this.dataService.getProfessorById(currentUser.id).subscribe({
+        next: (professor) => {
+          this.currentProfessor = professor;
+          // Load data after setting the current professor
+          this.loadData();
+        },
+        error: (error) => {
+          console.error('Error fetching professor:', error);
+          // Fallback to basic object
+          this.currentProfessor = {
+            idProfesseur: currentUser.id,
+            nomProfesseur: currentUser.email.split('@')[0],
+            prenomProfesseur: ''
+          };
+          this.loadData();
+        }
+      });
+    } else {
+      this.loadData();
     }
   }
 
@@ -302,9 +316,29 @@ export class ProfessorTimetableComponent implements OnInit {
       this.majors = data;
     });
 
-    this.dataService.getSubjects().subscribe(data => {
-      this.subjects = data;
-    });
+    // Load subjects specific to the current professor
+    if (this.currentProfessor?.idProfesseur) {
+      console.log('Loading subjects for professor ID:', this.currentProfessor.idProfesseur);
+      this.dataService.getSubjectsByProfessor(this.currentProfessor.idProfesseur).subscribe({
+        next: (data) => {
+          console.log('Subjects received for professor:', data);
+          this.subjects = data;
+        },
+        error: (error) => {
+          console.error('Error loading subjects for professor:', error);
+          // Fallback to all subjects if professor-specific subjects fail
+          this.dataService.getSubjects().subscribe(fallbackData => {
+            console.log('Using fallback subjects:', fallbackData);
+            this.subjects = fallbackData;
+          });
+        }
+      });
+    } else {
+      console.log('No professor ID available, loading all subjects');
+      this.dataService.getSubjects().subscribe(data => {
+        this.subjects = data;
+      });
+    }
   }
 
   initializeTimeSlots(): void {

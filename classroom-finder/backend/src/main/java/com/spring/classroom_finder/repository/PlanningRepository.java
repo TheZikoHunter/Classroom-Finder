@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.spring.classroom_finder.model.Filiere;
 import com.spring.classroom_finder.model.Horaire;
+import com.spring.classroom_finder.model.Matiere;
 import com.spring.classroom_finder.model.Planning;
 import com.spring.classroom_finder.model.Professeur;
 import com.spring.classroom_finder.model.Salle;
@@ -39,7 +40,8 @@ public interface PlanningRepository extends JpaRepository<Planning, Long> {
     @Query("SELECT DISTINCT p.filiere FROM Planning p WHERE p.professeur = :professeur")
     Set<Filiere> findAllFilieresByProfesseur(@Param("professeur") Professeur professeur);
 
-
-    
+    // Custom query to find all distinct subjects (matieres) that a professor teaches
+    @Query("SELECT DISTINCT p.matiere FROM Planning p WHERE p.professeur = :professeur")
+    Set<Matiere> findAllMatieresByProfesseur(@Param("professeur") Professeur professeur);
 
 }
