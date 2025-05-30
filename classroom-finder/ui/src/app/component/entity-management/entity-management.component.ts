@@ -6,13 +6,18 @@ import { Professor } from '../../models/professor.model';
 import { Subject } from '../../models/subject.model';
 import { Classroom } from '../../models/classroom.model';
 import { Major } from '../../models/major.model';
+import { ConfirmationService } from '../../services/confirmation.service';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-entity-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmationDialogComponent],
   template: `
     <div class="entity-management-container">
+      <!-- Confirmation Dialog -->
+      <app-confirmation-dialog></app-confirmation-dialog>
+      
       <div class="tabs">
         <button 
           *ngFor="let tab of tabs" 
@@ -354,7 +359,10 @@ export class EntityManagementComponent implements OnInit {
   isEditing = false;
   currentEditId: any = null;
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private confirmationService: ConfirmationService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -437,16 +445,40 @@ export class EntityManagementComponent implements OnInit {
     }
   }
 
-  deleteEntity(id: number, type: 'subject' | 'professor' | 'classroom' | 'major'): void {
-    if (confirm(`Are you sure you want to delete this ${type}?`)) {
+  async deleteEntity(id: number, type: 'subject' | 'classroom' | 'major'): Promise<void> {
+    let entityName = '';
+    let entity: any;
+    
+    // Get the entity name for the confirmation dialog
+    switch (type) {
+      case 'subject':
+        entity = this.subjects.find(s => s.id === id);
+        entityName = entity ? entity.nomMatiere : 'this subject';
+        break;
+      case 'classroom':
+        entity = this.classrooms.find(c => c.id === id);
+        entityName = entity ? entity.nomSalle : 'this classroom';
+        break;
+      case 'major':
+        entity = this.majors.find(m => m.idFiliere === id);
+        entityName = entity ? entity.nomFiliere : 'this major';
+        break;
+    }
+
+    const confirmed = await this.confirmationService.confirm({
+      title: `Delete ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+      message: `Are you sure you want to delete ${entityName}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       switch (type) {
         case 'subject':
           this.dataService.deleteSubject(id).subscribe(() => {
             this.loadData();
           });
-          break;
-        case 'professor':
-          // Implement professor deletion logic
           break;
         case 'classroom':
           this.dataService.deleteClassroom(id).subscribe(() => {

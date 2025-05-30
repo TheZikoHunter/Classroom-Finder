@@ -5,12 +5,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Professor } from '../../models/professor.model';
 import { DataService, ApiResponse } from '../../services/data.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmationService } from '../../services/confirmation.service';
 import { ToastContainerComponent } from '../toast-container/toast-container.component';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastContainerComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastContainerComponent, ConfirmationDialogComponent],
   templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
@@ -24,7 +26,8 @@ export class UserManagementComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private fb: FormBuilder,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private confirmationService: ConfirmationService
   ) {
     this.professorForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -191,8 +194,19 @@ export class UserManagementComponent implements OnInit {
     this.toastService.showInfo(`Editing ${professor.nomProfesseur} ${professor.prenomProfesseur}. Leave password empty to keep current password. ✏️`);
   }
 
-  deleteProfessor(id: number): void {
-    if (confirm('Are you sure you want to delete this professor?')) {
+  async deleteProfessor(id: number): Promise<void> {
+    const professor = this.professors.find(p => p.idProfesseur === id);
+    const professorName = professor ? `${professor.nomProfesseur} ${professor.prenomProfesseur}` : 'this professor';
+    
+    const confirmed = await this.confirmationService.confirm({
+      title: 'Delete Professor',
+      message: `Are you sure you want to delete ${professorName}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       console.log('Deleting professor with ID:', id);
       this.dataService.deleteProfessor(id)
         .subscribe({

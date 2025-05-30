@@ -3,13 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ProfesseurService, Professeur, ApiResponse } from '../../services/professeur.service';
+import { ConfirmationService } from '../../services/confirmation.service';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-professor-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, ConfirmationDialogComponent],
   template: `
     <div class="professor-management">
+      <!-- Confirmation Dialog -->
+      <app-confirmation-dialog></app-confirmation-dialog>
+      
       <h2>Manage Professors</h2>
       
       <!-- Success/Error Messages -->
@@ -170,7 +175,10 @@ export class ProfessorManagementComponent implements OnInit {
   isLoading: boolean = false;
   loadingProfessors: boolean = false;
 
-  constructor(private professeurService: ProfesseurService) {}
+  constructor(
+    private professeurService: ProfesseurService,
+    private confirmationService: ConfirmationService
+  ) {}
 
   ngOnInit() {
     this.loadProfesseurs();
@@ -278,8 +286,19 @@ cancelEdit() {
   this.errorMessage = '';
 }
 
-  deleteProfesseur(id: number) {
-    if (confirm('Are you sure you want to delete this professor?')) {
+  async deleteProfesseur(id: number): Promise<void> {
+    const professor = this.professeurs.find(p => p.idProfesseur === id);
+    const professorName = professor ? `${professor.nomProfesseur} ${professor.prenomProfesseur}` : 'this professor';
+    
+    const confirmed = await this.confirmationService.confirm({
+      title: 'Delete Professor',
+      message: `Are you sure you want to delete ${professorName}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       this.professeurService.deleteProfesseur(id).subscribe({
         next: (response: ApiResponse) => {
           if (response.success) {
