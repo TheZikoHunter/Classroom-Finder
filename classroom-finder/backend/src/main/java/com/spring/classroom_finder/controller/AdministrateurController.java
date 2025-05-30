@@ -13,8 +13,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/administrateurs")
-
-@CrossOrigin(origins = "http://localhost:4200")
 public class AdministrateurController {
 
     @Autowired
@@ -27,9 +25,9 @@ public class AdministrateurController {
             List<Administrateur> administrateurs = new ArrayList<>();
 
             if (nom == null)
-                administrateurs.addAll(administrateurRepository.findAll());
+                administrateurs = administrateurRepository.findAll();
             else
-                administrateurs.addAll(administrateurRepository.findByNomContaining(nom));
+                administrateurs = administrateurRepository.findByNomContaining(nom);
 
             if (administrateurs.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -37,7 +35,7 @@ public class AdministrateurController {
 
             return new ResponseEntity<>(administrateurs, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -58,7 +56,7 @@ public class AdministrateurController {
             Administrateur _administrateur = administrateurRepository.save(administrateur);
             return new ResponseEntity<>(_administrateur, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

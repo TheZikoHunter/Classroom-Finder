@@ -1,6 +1,5 @@
 package com.spring.classroom_finder.model;
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 public class Professeur {

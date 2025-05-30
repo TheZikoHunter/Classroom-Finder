@@ -13,8 +13,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/filieres")
-
-@CrossOrigin(origins = "http://localhost:4200")
 public class FiliereController {
 
     @Autowired
@@ -37,7 +35,7 @@ public class FiliereController {
 
             return new ResponseEntity<>(filieres, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -58,7 +56,7 @@ public class FiliereController {
             Filiere _filiere = filiereRepository.save(filiere);
             return new ResponseEntity<>(_filiere, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

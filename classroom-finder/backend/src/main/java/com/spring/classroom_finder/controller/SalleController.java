@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/salles")
-@CrossOrigin(origins = "http://localhost:4200")
 public class SalleController {
 
     @Autowired
@@ -36,7 +35,7 @@ public class SalleController {
 
             return new ResponseEntity<>(salles, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -57,7 +56,7 @@ public class SalleController {
             Salle _salle = salleRepository.save(salle);
             return new ResponseEntity<>(_salle, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
