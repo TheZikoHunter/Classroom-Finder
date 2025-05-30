@@ -621,10 +621,12 @@ export class DashboardComponent implements OnInit {
   }
 
   updateProfessorFilter(): void {
-    this.professorFilter = this.professors.map(professor => ({
-      value: professor.id_professeur,
-      label: professor.nomProfesseur + ' ' + professor.prenomProfesseur
-    }));
+    this.professorFilter = this.professors
+      .filter(professor => professor.idProfesseur !== undefined)
+      .map(professor => ({
+        value: professor.idProfesseur as number,
+        label: professor.nomProfesseur + ' ' + professor.prenomProfesseur
+      }));
   }
 
   updateSubjectFilter(): void {

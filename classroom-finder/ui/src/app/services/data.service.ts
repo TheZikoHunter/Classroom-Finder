@@ -15,6 +15,12 @@ export interface Planning {
   salleId: string;
 }
 
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,16 +34,16 @@ export class DataService {
     return this.http.get<Professor[]>(`${this.apiUrl}/professeurs`);
   }
 
-  createProfessor(professor: Omit<Professor, 'id_professeur'>): Observable<Professor> {
-    return this.http.post<Professor>(`${this.apiUrl}/professeurs`, professor);
+  createProfessor(professor: Omit<Professor, 'idProfesseur'>): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/professeurs`, professor);
   }
 
-  updateProfessor(professor: Professor): Observable<Professor> {
-    return this.http.put<Professor>(`${this.apiUrl}/professeurs/${professor.id_professeur}`, professor);
+  updateProfessor(professor: Professor): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.apiUrl}/professeurs/${professor.idProfesseur}`, professor);
   }
 
-  deleteProfessor(id_professeur: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/professeurs/${id_professeur}`);
+  deleteProfessor(idProfesseur: number): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.apiUrl}/professeurs/${idProfesseur}`);
   }
 
   // Subject operations

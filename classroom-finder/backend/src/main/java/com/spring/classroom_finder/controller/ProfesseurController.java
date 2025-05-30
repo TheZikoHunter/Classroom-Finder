@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -54,48 +56,119 @@ public class ProfesseurController {
 
     // Create a new Professeur
     @PostMapping
-public ResponseEntity<Professeur> createProfesseur(@RequestBody Professeur professeur) {
+public ResponseEntity<?> createProfesseur(@RequestBody Professeur professeur) {
     try {
+        System.out.println("Creating professor: " + professeur.getEmail());
+        
         // Hash the password before saving
-        professeur.setMot_de_passe(passwordEncoder.encode(professeur.getMot_de_passe()));
+        if (professeur.getMotDePasse() != null && !professeur.getMotDePasse().isEmpty()) {
+            String hashedPassword = passwordEncoder.encode(professeur.getMotDePasse());
+            professeur.setMotDePasse(hashedPassword);
+        }
         
         Professeur savedProf = professeurRepository.save(professeur);
-        return new ResponseEntity<>(savedProf, HttpStatus.CREATED);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Professor created successfully");
+        response.put("data", savedProf);
+        
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     } catch (Exception e) {
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        System.err.println("Error creating professor: " + e.getMessage());
+        e.printStackTrace();
+        
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("success", false);
+        errorResponse.put("message", "Error creating professor: " + e.getMessage());
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 
-    // Update a Professeur
-@PutMapping("/{id}")
-public ResponseEntity<Professeur> updateProfesseur(@PathVariable("id") int id, @RequestBody Professeur professeur) {
-    Optional<Professeur> profData = professeurRepository.findById(id);
 
-    if (profData.isPresent()) {
-        Professeur existingProf = profData.get();
-        existingProf.setNomProfesseur(professeur.getNomProfesseur());
-        existingProf.setPrenomProfesseur(professeur.getPrenomProfesseur());
-        existingProf.setEmail(professeur.getEmail());
+    // Update a Professeur
+    @PutMapping("/{id}")
+public ResponseEntity<?> updateProfesseur(@PathVariable("id") int id, @RequestBody Professeur professeur) {
+    try {
+        System.out.println("Updating professor with ID: " + id);
+        System.out.println("Update data: " + professeur.getEmail());
         
-        // Only hash password if it's being changed
-        if (professeur.getMot_de_passe() != null && !professeur.getMot_de_passe().isEmpty()) {
-            existingProf.setMot_de_passe(passwordEncoder.encode(professeur.getMot_de_passe()));
+        Optional<Professeur> profData = professeurRepository.findById(id);
+
+        if (profData.isPresent()) {
+            Professeur existingProf = profData.get();
+            
+            // Update basic info
+            existingProf.setNomProfesseur(professeur.getNomProfesseur());
+            existingProf.setPrenomProfesseur(professeur.getPrenomProfesseur());
+            existingProf.setEmail(professeur.getEmail());
+            
+            // Only update password if it's provided and not empty
+            if (professeur.getMotDePasse() != null && !professeur.getMotDePasse().trim().isEmpty()) {
+                System.out.println("Updating password for professor");
+                existingProf.setMotDePasse(passwordEncoder.encode(professeur.getMotDePasse()));
+            } else {
+                System.out.println("Password not provided, keeping existing password");
+                // Keep the existing password - don't change it
+            }
+            
+            Professeur updatedProf = professeurRepository.save(existingProf);
+            System.out.println("Professor updated successfully with ID: " + updatedProf.getIdProfesseur());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Professor updated successfully");
+            response.put("data", updatedProf);
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            System.out.println("Professor not found with ID: " + id);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Professor not found with ID: " + id);
+            
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
+    } catch (Exception e) {
+        System.err.println("Error updating professor: " + e.getMessage());
+        e.printStackTrace();
         
-        return new ResponseEntity<>(professeurRepository.save(existingProf), HttpStatus.OK);
-    } else {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("success", false);
+        errorResponse.put("message", "Error updating professor: " + e.getMessage());
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 
     // Delete a Professeur
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteProfesseur(@PathVariable("id") int id) {
+    public ResponseEntity<?> deleteProfesseur(@PathVariable("id") int id) {
         try {
-            professeurRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Optional<Professeur> profData = professeurRepository.findById(id);
+            
+            if (profData.isPresent()) {
+                professeurRepository.deleteById(id);
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Professor deleted successfully");
+                
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "Professor not found");
+                
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+            }
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Error deleting professor: " + e.getMessage());
+            
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -314,7 +314,7 @@ export class AssignmentDialogComponent implements OnInit {
       const planning: Planning = {
         idMatiere: this.selectedSubject!.id,
         idHoraire: horaireId,
-        idProfesseur: this.hideProfessorSelect ? this.professors[0].id_professeur : this.selectedProfessor!.id_professeur,
+        idProfesseur: this.hideProfessorSelect ? this.professors[0].idProfesseur! : this.selectedProfessor!.idProfesseur!,
         idFiliere: this.selectedMajorId,
         salleId: this.selectedClassroom!.nomSalle
       };

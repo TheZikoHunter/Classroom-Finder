@@ -83,7 +83,7 @@ logger.info("Professor lookup result: {}", professeur.isPresent() ? "Found" : "N
 if (professeur.isPresent()) {
     logger.info("Checking password for professor: {}", professeur.get().getNomProfesseur());
 
-    String storedHash = professeur.get().getMot_de_passe();
+    String storedHash = professeur.get().getMotDePasse();
     logger.info("Professor stored password hash: [{}]", storedHash);
 
     // Use password encoder for professors too
@@ -93,9 +93,9 @@ if (professeur.isPresent()) {
     if (passwordMatches) {
         logger.info("Professor login successful");
         Map<String, Object> response = new HashMap<>();
-        response.put("token", "professor-token-" + professeur.get().getId_professeur());
+        response.put("token", "professor-token-" + professeur.get().getIdProfesseur());
         Map<String, Object> user = new HashMap<>();
-        user.put("id", professeur.get().getId_professeur());
+        user.put("id", professeur.get().getIdProfesseur());
         user.put("username", professeur.get().getNomProfesseur() + " " + professeur.get().getPrenomProfesseur());
         user.put("email", professeur.get().getEmail());
         user.put("role", "PROFESSOR");

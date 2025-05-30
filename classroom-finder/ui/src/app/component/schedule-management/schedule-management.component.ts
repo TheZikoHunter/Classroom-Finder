@@ -22,7 +22,7 @@ interface Planning {
     jour: string;
   };
   professeur: {
-    id_professeur: number;
+    idProfesseur: number;
     email: string;
     mot_de_passe: string;
     nomProfesseur: string;
@@ -52,7 +52,7 @@ interface Reservation {
     jour: string;
   };
   professeur: {
-    id_professeur: number;
+    idProfesseur: number;
     email: string;
     mot_de_passe: string;
     nomProfesseur: string;

@@ -31,11 +31,11 @@ public class Professeur {
     public Professeur() {
     }
 
-    public int getId_professeur() {
+    public int getIdProfesseur() {
         return idProfesseur;
     }
 
-    public void setId_professeur(int idProfesseur) {
+    public void setIdProfesseur(int idProfesseur) {
         this.idProfesseur = idProfesseur;
     }
 
@@ -47,11 +47,11 @@ public class Professeur {
         this.email = email;
     }
 
-    public String getMot_de_passe() {
+    public String getMotDePasse() {
         return motDePasse;
     }
 
-    public void setMot_de_passe(String motDePasse) {
+    public void setMotDePasse(String motDePasse) {
         this.motDePasse = motDePasse;
     }
 

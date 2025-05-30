@@ -24,7 +24,7 @@ interface Planning {
     jour: string;
   };
   professeur: {
-    id_professeur: number;
+    idProfesseur: number;
     email: string;
     mot_de_passe: string;
     nomProfesseur: string;
@@ -84,7 +84,7 @@ interface Classroom {
                 <tr *ngFor="let range of timeRanges">
                   <td class="time-cell">{{range.start}} - {{range.end}}</td>
                   <td *ngFor="let day of days" class="slot-cell" 
-                      [class.my-slot]="getTimeSlot(day, range)?.type === 'planning' && getTimeSlot(day, range)?.professor?.id_professeur === currentProfessor?.id_professeur"
+                      [class.my-slot]="getTimeSlot(day, range)?.type === 'planning' && getTimeSlot(day, range)?.professor?.idProfesseur === currentProfessor?.idProfesseur"
                       [class.temporary]="getTimeSlot(day, range)?.type === 'reservation'"
                       (click)="assignTimeSlot(getTimeSlot(day, range))">
                     <ng-container *ngIf="getTimeSlot(day, range) as slot">
@@ -286,7 +286,7 @@ export class ProfessorTimetableComponent implements OnInit {
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
       this.currentProfessor = {
-        id_professeur: currentUser.id,
+        idProfesseur: currentUser.id,
         nomProfesseur: currentUser.email.split('@')[0],
         prenomProfesseur: ''
       };
@@ -403,7 +403,7 @@ export class ProfessorTimetableComponent implements OnInit {
 
   assignTimeSlot(slot: TimeSlot | null): void {
     if (slot) {
-      if (slot.professor && slot.professor.id_professeur !== this.currentProfessor.id_professeur) {
+      if (slot.professor && slot.professor.idProfesseur !== this.currentProfessor.idProfesseur) {
         alert('This time slot is already assigned to another professor');
         return;
       }

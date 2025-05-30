@@ -1,7 +1,7 @@
 export interface Professor {
-  id_professeur: number;
+  idProfesseur?: number;
   nomProfesseur: string;
   prenomProfesseur: string;
   email: string;
-  mot_de_passe?: string;
+  motDePasse?: string;
 }
