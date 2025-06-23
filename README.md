@@ -1,108 +1,57 @@
-# Classroom Finder
+# Classroom Finder – Localisation de salles disponibles
 
-Classroom Finder is a full-stack application designed to help users locate available classrooms. The project is organized into a backend (Java/Maven) and a frontend (Angular).
-
-## Project Structure
-
-- `backend/` - Contains the backend code (Java, Maven).
-- `ui/` - Contains the frontend code (Angular).
+Application full-stack développée pour faciliter la recherche de salles libres sur un campus universitaire, en fonction de l'heure, du jour et du bâtiment. Classroom Finder vise à améliorer la gestion des ressources physiques dans les établissements d’enseignement.
 
 ---
 
-## Backend
+## Objectifs
 
-The backend is a Java application managed with Maven.
-
-### Getting Started
-
-1. **Navigate to the backend directory:**
-    ```bash
-    cd classroom-finder/backend
-    ```
-
-2. **Build the project:**
-    ```bash
-    ./mvnw clean install
-    ```
-
-3. **Run the backend server:**
-    ```bash
-    ./mvnw spring-boot:run
-    ```
-
-> The backend will typically start on `http://localhost:8080/` (verify in your configuration).
+- Permettre aux étudiants et enseignants de localiser rapidement une salle libre  
+- Optimiser l’utilisation des espaces pédagogiques  
+- Fournir une interface rapide, sécurisée et responsive  
+- Centraliser les données d’occupation des salles
 
 ---
 
-## Frontend
+## Fonctionnalités principales
 
-The frontend is built with Angular.
+- Recherche de salles par date, heure, bâtiment ou type  
+- Authentification des utilisateurs (Spring Security)  
+- Visualisation des disponibilités en temps réel  
+- Interface web Angular intuitive  
+- Accès multi-profils : étudiants, enseignants, staff  
 
-### Development Server
+---
 
-1. **Navigate to the UI directory:**
-    ```bash
-    cd classroom-finder/ui
-    ```
+## Technologies utilisées
 
-2. **Install dependencies:**
-    ```bash
-    npm install
-    ```
+- **Back-end** :
+  - Java
+  - Spring Boot (REST APIs)
+  - Spring Data JPA
+  - Spring Security
+  - Maven
+  - MySQL
 
-3. **Start the development server:**
-    ```bash
-    ng serve
-    ```
+- **Front-end** :
+  - Angular
+  - HTML / CSS / TypeScript
+  - Bootstrap
 
-4. Open your browser to [http://localhost:4200/](http://localhost:4200/). The application reloads automatically when you modify source files.
+---
 
-### Building
+## Architecture
 
-To build the frontend for production:
+- Architecture RESTful  
+- Séparation claire entre back-end (API) et front-end  
+- Authentification basée sur rôles (JWT ou session selon config)  
+- Modèle relationnel stocké dans MySQL
+
+---
+
+## Exécution
+
+### Backend
 ```bash
-ng build
-```
-The build artifacts will be stored in the `dist/` directory.
-
-### Running Unit Tests
-
-To execute unit tests:
-```bash
-ng test
-```
-
-### Running End-to-End Tests
-
-For end-to-end (e2e) testing:
-```bash
-ng e2e
-```
-> Note: Angular CLI does not include an e2e framework by default. Choose one that fits your needs.
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a pull request
-
----
-
-## License
-
-[MIT](LICENSE) (replace with your actual license if different)
-
----
-
-## Additional Resources
-
-- [Angular CLI Documentation](https://angular.dev/tools/cli)
-- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-
----
-
-*This README is a template. Add project-specific details such as API endpoints, deployment, and contact information as needed.*
+cd backend/
+mvn spring-boot:run
